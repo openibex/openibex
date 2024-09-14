@@ -1,0 +1,100 @@
+# Config contains local settings for the runner and database discovery.
+
+# Wallets: Multiple wallets can be imported in JSON-Keystore format and used.
+# Each wallet gets an own DB instance.
+wallets:
+  eip155:
+    default:
+      file: wallet-default.json
+      password: test
+    alice:
+      file: wallet-alice.json
+      password: test
+
+database:
+  # Namespace for the database defaults to openibex, change for your app.
+  # The namespace is used internally, but also externally when a database is
+  # published.
+  namespace: "openibex"
+  # Directory where OrbitDB puts the temp files. Needs to persist with the stores.
+  path: "./data/"
+  # Address of the applications main database
+  # address: /orbitdb/zdpuAytZpdBKqfMfQpTGaN1ujj5sVprc1YYd3dH44C3mH99iN
+
+plugins:
+  # Namespace of the plugins. I.e. @openibex/chain is in openibex namespace.
+  openibex:
+    # The supported chains and their providers
+    chain:
+      # CAIP Notation aligned but with a human readable identifier.
+      # Ethereum mainnet
+      eip155: # CAIP-2 Ethereum EVM Stack
+        wallets:
+          default:
+            file: wallets/eip155/default.json
+            password: test
+          alice:
+            file: wallets/eip155/alice.json
+            password: test
+        networks:
+          mainnet: 
+            chainId: 1 # CAIP-2 chain ID, here it's Ethereum.
+            plugins:
+              etherscan:
+                className: EtherscanPlugin
+                params:
+                  url: https://exp.example.com
+                  #api_key:
+                  #api_user:
+            providers:
+              default: # Provider type, default is choosen automatically, and is websocket.
+                className: DefaultProvider
+                settings:
+                  # Optional rate limits only apply to requests enqueued through rate limiter.
+                  # If you're using a distributed RPC provider that has the same key for multiple
+                  # networks, total rate limits need to be distributed between those networks.
+                  #
+                  # Also consider reserves non-limited requests (i.e. transactions).
+                  # Rate-limit is in reqs/min.
+                  rateLimit: 3
+                  # Size of the import batches
+                  batchSize: 5000
+                params:
+                  # Endpoint can be an url or a preconfigured ethers network.
+                  # See: TBD (mainnet, optimism, various testnets)
+                  endpoint:  https://example.com/<someKey>
+              rpc:
+                className: RpcProvider
+                params:
+                  endpoint: https://example.com/<someKey>
+          testnet:
+            chainId: 10000
+          hardhat:
+            chainId: 31337
+            providers:
+              default:
+                className: DefaultProvider
+                params:
+                  endpoint: http://127.0.0.1:8545/
+
+
+# Helia configuration, see system diagram in: https://github.com/ipfs/helia
+helia:
+  # A partial of: https://libp2p.github.io/js-libp2p/interfaces/_libp2p_interface.Libp2p.html
+  libp2p:
+    # How node discovery is done browser, public, airgap, standalone.
+    mode: standalone
+  
+  # Blockstore is used for files and most DB-Types.
+  blockstore:
+    # Can be memory, level, ... (extendable)
+    plugin: level
+    params:
+      # Path on filesystem for local non-memory databases.
+      path: "./data/ipfs"
+  
+  # Datastore, used by OrbitDB (not for the data) and IPNS alike.
+  datastore:
+    # Can be memory, level, s3...
+    plugin: memory
+    params: {}

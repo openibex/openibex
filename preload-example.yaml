@@ -1,0 +1,21 @@
+database:
+  # Namespace of the dapp from which the database is imported, and database subspace
+  - name: openibex.chain.blocks.v1
+    # Address of the database. Schema is autoloaded from the db metadata.
+    address: /orbitdb/zdpuArW4W9G5e8o4XzTrHbefzXH44xGvAgNDnyK9apMjAMqGK
+    # Database type, needs to be a type known to your application.
+    type: keyvalue
+
+settings:
+  - name: test
+    plugin: core
+    value: true
+  - name: lastblock
+    plugin: chain
+    namespace: openibex
+    value:
+      trie: 0x0032f
+      block: 80000000
+      logs:
+        - id: 1
+        - id: 2

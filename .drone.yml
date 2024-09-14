@@ -1,0 +1,25 @@
+kind: pipeline
+type: kubernetes
+name: default
+
+steps:
+  - name: test1
+    image: alpine
+    commands:
+    - echo this should pass
+  
+  - name: test2
+    image: alpine
+    commands:
+    - echo this should fail
+    - exit 2
+
+  - name: test3
+    image: alpine
+    commands:
+    - echo stage status is $DRONE_STAGE_STATUS
+    - echo build status is $DRONE_BUILD_STATUS
+    when:
+      status:
+      - success
+      - failure

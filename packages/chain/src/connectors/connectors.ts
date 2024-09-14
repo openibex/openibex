@@ -1,0 +1,44 @@
+import { AssetArtifact, getCAIPAssetType } from "../resolver";
+import { OiConnector, OiConnectorConf } from "./connector";
+
+const connectorRegister: { [namespace: string]: { [connectorName: string]: typeof OiConnector } } = {
+  eip1155: {}
+};
+
+/**
+ * Register a contract connector for later use with the factory.
+ * 
+ * @param name Name of the ABI
+ * @param connector ABI definition in chain specific format
+ * @param namespace Namespace for the connector, defaults to 'eip155'
+ */
+export async function useContractConnector(name: string, connector: typeof OiConnector, namespace: string = 'eip155') {
+
+  if (!connectorRegister[namespace]) {
+    connectorRegister[namespace] = {};
+  }
+  connectorRegister[namespace][name] = connector;
+}
+
+/**
+ * Initializes and returns a chain connector.
+ * 
+ * @param assetArtifact 
+ * @returns 
+ */
+export async function getContractConnector(assetArtifact: AssetArtifact, params: OiConnectorConf): Promise<OiConnector> {
+  const assetType = getCAIPAssetType(assetArtifact);
+  const namespace = assetType.chainId.namespace;
+  
+  if (namespace !== 'eip155') {
+    throw new Error(`Unsupported namespace: ${namespace}`);
+  }
+
+  const connector = connectorRegister[namespace][assetType.assetName.namespace];
+  
+  if (!connector) {
+    throw new Error(`Connector not found for name: ${assetType.assetName.reference} in namespace: ${namespace}`);
+  }
+  
+  return new connector(assetArtifact, params);
+}
