@@ -150,7 +150,7 @@ export const OiNKeyValueDatabase = () => async ({
       key: number
       value: unknown;
       hash: string;
-    } | undefined;
+    } | undefined = undefined;
 
     for await (const entry of iterator({amount: 1})){
       retval = {
@@ -160,8 +160,7 @@ export const OiNKeyValueDatabase = () => async ({
       }
     }
 
-    if (retval)
-      return retval;
+    return retval
   }
 
   return {
