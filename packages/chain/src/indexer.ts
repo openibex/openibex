@@ -81,7 +81,9 @@ class OiEventIndexer{
       delete(this.dbPeers[peerId]);
     });
 
-    const { key } = await this.processedDB.newest();
+    const returnValue = await this.processedDB.newest();
+    const key = (returnValue === undefined) ? 0 : returnValue.key;
+
     let lastBlock = key + 1
     fromBlock = lastBlock > fromBlock ? lastBlock: fromBlock; 
 
