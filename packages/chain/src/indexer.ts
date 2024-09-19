@@ -1,23 +1,12 @@
 import { Contract, ContractEventPayload, DeferredTopicFilter, EventLog, Filter, Log } from 'ethers';
 import { getCAIPChain } from './resolver';
 import { getContract } from './contracts';
-import { pluginNamespace, pluginName } from './plugin';
 import { AssetArtifact } from './resolver';
 import { getSubscriptionId, subscribeContract } from './subscriber';
 import { latestBlock } from './blocks';
-import { coreApp } from './plugin';
-import { getNodeId, OiCore, OiNKeyValue } from '@openibex/core';
+import { plugin } from './plugin';
+import { getNodeId, OiNKeyValue } from '@openibex/core';
 import { getRateLimiter } from './providers';
-
-/**
- * Init the indexer, called from plugin init. Opens the DB.
- * 
- * @param coreApp the core application
- */
-export async function initIndexer(coreApp: OiCore) {
-  // lastBlockKeeper = await coreApp.getDB(1, 'keyvalue', 'indexer', pluginName) as OiKeyValueExtended<number>;
-  //console.log(lastBlockKeeper);
-}
 
 /**
  * Subscribes to a contract event and calls a processing callback. If processing is successfull log entry is added to processed index..
@@ -44,9 +33,9 @@ export async function indexEvents(
   const subscriptionId = getSubscriptionId(assetArtifact, eventName, bloomFilters)
   const indexer: OiEventIndexer = new OiEventIndexer(assetArtifact, eventName, callback, bloomFilters)
   // Indexer class will handle mutexes and failover once it's implemented.
-  await coreApp.setVal(getNodeId(), 'mutex', pluginName, subscriptionId);
+  await plugin.setVal(getNodeId(), 'mutex', subscriptionId);
 
-  coreApp.log.info(`Starting indexer on ${assetArtifact.toString()}/${eventName} from ${fromBlock}`);
+  plugin.log.info(`Starting indexer on ${assetArtifact.toString()}/${eventName} from ${fromBlock}`);
   indexer.startIndexer(fromBlock);
 }
 
@@ -70,7 +59,7 @@ class OiEventIndexer{
 
   public async startIndexer(fromBlock: number | string) {
     
-    this.processedDB = await coreApp.getDB(1, 'oinkeyvalue', 'indexer.processor', pluginName, this.subscriptionId) as OiNKeyValue<string>;
+    this.processedDB = await plugin.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
 
     // Track peers that connect to this database, hence run indexers as well.
     this.processedDB.events.on('join', async (peerId, heads) => {
@@ -116,7 +105,7 @@ class OiEventIndexer{
       const endBlock = Math.min(startBlock + 4000 - 1, await latestBlock(this.assetArtifact));
       const events = await rateLimiter.execute(() => contract.queryFilter(filter, startBlock, endBlock));
   
-      coreApp.log.info(`Found ${events.length} events for ${this.assetArtifact} in blocks ${startBlock} to ${endBlock}`);
+      plugin.log.info(`Found ${events.length} events for ${this.assetArtifact} in blocks ${startBlock} to ${endBlock}`);
 
       if(events.length == 0) {
         lastBlock = endBlock;
@@ -154,11 +143,11 @@ class OiEventIndexer{
     } else if (event instanceof EventLog) {
       sendEvent = event;
     } else {
-      coreApp.log.error(`An Event in unknown format was retrieved`);
+      plugin.log.error(`An Event in unknown format was retrieved`);
       return
     }
     if(!sendEvent) {
-      coreApp.log.error(`No event found.`);
+      plugin.log.error(`No event found.`);
       return;
     }
 
@@ -171,7 +160,7 @@ class OiEventIndexer{
 
     args.push(sendEvent)
 
-    coreApp.log.info(`Log at ${sendEvent.blockNumber}-${sendEvent.index}: Arguments ${args.join(', ')}`);
+    plugin.log.info(`Log at ${sendEvent.blockNumber}-${sendEvent.index}: Arguments ${args.join(', ')}`);
     await this.callback(...args);
   }
 }

@@ -1,7 +1,5 @@
-import { OiCore, registerOiPlugin } from "@openibex/core";
-import { createChainMap } from "./resolver";
-import { initResolver } from "./resolver/resolver";
-import { initIndexer } from "./indexer";
+import { registerOiPlugin } from "@openibex/core";
+import { OiPlugin } from "@openibex/core";
 
 export const pluginName = 'chain';
 export const pluginNamespace = 'openibex';
@@ -43,13 +41,11 @@ const pluginDefaultConfig = {
 
 export let pluginConfig = pluginDefaultConfig;
 
-export let coreApp: OiCore;
+export let plugin: OiPlugin = new OiPlugin(pluginName, pluginNamespace);
+
+plugin.onInit('chain', async (name: string, config: any, plugin: OiPlugin) : Promise<void> => {
+  pluginConfig = config;
+});
 
 // Register the plugin
-registerOiPlugin(pluginName, pluginNamespace, (name: string, config: any, core: OiCore) => {
-  pluginConfig = {...pluginDefaultConfig, ...config};
-  coreApp = core;
-  createChainMap(config);
-  initResolver(coreApp);
-  initIndexer(coreApp);
-});
+registerOiPlugin(pluginName, pluginNamespace, plugin);

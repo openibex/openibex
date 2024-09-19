@@ -1,6 +1,6 @@
 import { Wallet, HDNodeWallet } from "ethers";
 import { type AssetArtifact, ChainArtifact, getCAIPChain } from "./resolver";
-import { coreApp } from "./plugin";
+import { plugin } from "./plugin";
 import * as fs from 'fs';
 import { AccountId } from "caip";
 
@@ -25,9 +25,9 @@ export function initWallets(pluginConf: any) {
           wallets[namespace] = {};
         }
         wallets[namespace][walletName] = wallet;
-        coreApp.log.info(`Initialized wallet ${walletName} on ${namespace}`);
+        plugin.log.info(`Initialized wallet ${walletName} on ${namespace}`);
       } else {
-        coreApp.log.error(`Missing file or password for ${walletName} wallet on ${namespace}`);
+        plugin.log.error(`Missing file or password for ${walletName} wallet on ${namespace}`);
       }
     }
   }
@@ -46,7 +46,7 @@ export function getWallet(walletName: string, chainArtifact: ChainArtifact) {
   if(namespace && wallets[namespace][walletName])
     return wallets[namespace][walletName];
 
-  coreApp.log.warn(`Wallet ${name} for ${namespace} was not found.`);
+  plugin.log.warn(`Wallet ${name} for ${namespace} was not found.`);
   
   return undefined;
 }

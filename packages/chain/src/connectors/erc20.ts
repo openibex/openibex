@@ -3,7 +3,7 @@ import { OiConnector, OiConnectorConf } from "./connector";
 import { useContractConnector } from "./connectors";
 import { AssetArtifact, lookupCaipTag } from "../resolver";
 import { useABI } from "../contracts";
-import { coreApp } from "../plugin";
+import { plugin } from "../plugin";
 import { AccountId } from "caip";
 import { OiChainTokenSupply } from "../primitives/supply";
 import { EventLog } from "ethers";
@@ -33,12 +33,12 @@ export class OiErc20 extends OiConnector {
 
       const [caipTagFrom, caipTagTo] = await super.tagAndResolve(fromAccount, toAccount);
       
-      coreApp.log.info(`ERC20 transfer ${amount}, ${fromAccount.toString()}, ${toAccount.toString()}`);
+      plugin.log.info(`ERC20 transfer ${amount}, ${fromAccount.toString()}, ${toAccount.toString()}`);
 
       await super.addLog('Transfer', { block: event.blockNumber, caipTagFrom, caipTagTo, amount, event});
 
-      coreApp.log.info(`ERC20 transfer CAIP-Tags from ${caipTagFrom} (${fromAccount.toString()}), to ${caipTagTo} (${fromAccount.toString()})`);
-      coreApp.log.info(`ERC20 transfer looking up addresses: ${await lookupCaipTag(caipTagFrom)} (${caipTagFrom}), ${await lookupCaipTag(caipTagTo)} (${caipTagTo})`);
+      plugin.log.info(`ERC20 transfer CAIP-Tags from ${caipTagFrom} (${fromAccount.toString()}), to ${caipTagTo} (${fromAccount.toString()})`);
+      plugin.log.info(`ERC20 transfer looking up addresses: ${await lookupCaipTag(caipTagFrom)} (${caipTagFrom}), ${await lookupCaipTag(caipTagTo)} (${caipTagTo})`);
     }, 
     20740100 );
   }

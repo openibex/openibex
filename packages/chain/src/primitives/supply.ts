@@ -3,7 +3,7 @@ import { AssetArtifact, tagCaipArtifact } from "../resolver";
 import { pluginName, pluginNamespace } from "../plugin";
 import { EventLog } from "ethers";
 import { OiBlockchainPrimitive } from "./blockchain";
-import { coreApp } from "../plugin";
+import { plugin } from "../plugin";
 import { getBurnAddress, getMintAddress } from "../utils";
 
 /**
@@ -45,7 +45,7 @@ export class OiChainTokenSupply extends OiBlockchainPrimitive {
     this.burnAddrTag = tagCaipArtifact(getBurnAddress(this.assetArtifact)) as string;
     this.mintAddrTag = tagCaipArtifact(getMintAddress(this.assetArtifact)) as string;
 
-    this.supplyDb = await coreApp.getDB(1, 'oinkeyvalue', 'supply', this.pluginName, this.assetArtifactTag) as OiNKeyValue<StateOfSupply>; 
+    this.supplyDb = await plugin.getDB(1, 'oinkeyvalue', 'supply', this.assetArtifactTag) as OiNKeyValue<StateOfSupply>; 
   }
 
   /**
@@ -85,14 +85,14 @@ export class OiChainTokenSupply extends OiBlockchainPrimitive {
       return;
     }
 
-    coreApp.log.info(`Logging block ${this.currentBlock} at block no ${this.currentBlock}`);
+    plugin.log.info(`Logging block ${this.currentBlock} at block no ${this.currentBlock}`);
     await this.supplyDb.put(
       this.currentBlock,
       [this.mintAmount, this.currentMintTree, this.allMintsTrie, this.burnAmount, this.currentBurnTree, this.allBurnsTrie, this.supplyAmount]
     );
 
-    coreApp.log.info(`Logged supply data for ${this.assetArtifact.toString()} on block ${this.currentBlock}.`);
-    coreApp.log.info(`Total minted: ${this.mintAmount}, Total Burned: ${this.burnAmount}, current supply: ${this.supplyAmount}.`);
+    plugin.log.info(`Logged supply data for ${this.assetArtifact.toString()} on block ${this.currentBlock}.`);
+    plugin.log.info(`Total minted: ${this.mintAmount}, Total Burned: ${this.burnAmount}, current supply: ${this.supplyAmount}.`);
 
     this.mintAmount, this.burnAmount = 0n;
     this.mintCount, this.burnCount = 0;

@@ -3,7 +3,7 @@ import { OiConfig } from "./core.config";
 import { startNode } from "./node";
 import { openDatabase } from "./db";
 import { getOiCore } from "./index";
-import type { OiCoreSchema } from "./core.d";
+import type { OiCoreSchema } from "./plugins";
 
 // Define the type for the database entry
 export interface DatabaseEntry {
@@ -55,8 +55,8 @@ export async function initApp(config: OiConfig, preload: OiPreload, logger: any)
   const core = await getOiCore(config, logger);
 
   for(const entry of preload.settings){
-    await core.setVal(entry.value, entry.name, entry.plugin, entry?.namespace);
-    logger.info(`Preload entry ${entry.plugin}, ${entry.name} to value: ${await core.getVal( entry.name, entry.plugin, entry?.namespace)}`);
+    await core.setVal(entry.value, `${entry.namespace}.${entry.plugin}.${entry.name}`);
+    logger.info(`Preload entry ${entry.namespace}.${entry.plugin}.${entry.name} to value: ${await core.getVal( entry.name, `${entry.namespace}.${entry.plugin}.${entry.name}`)}`);
   }
 
   // Currently no other workaround for that: KeyValueIndexed creates a LevelStorage index.

@@ -3,7 +3,7 @@ export { startNode, stopNode, getNodeId} from './node';
 export { initApp } from './init';
 export { OiPreload } from './init';
 
-export { registerOiPlugin, isRegisteredPlugin, getPluginNamespace} from './plugins';
+export { registerOiPlugin, OiPlugin} from './plugins';
 
 export {OiPrimitive} from './primitives';
 export {usePrimitive, getPrimitive } from './primitives';

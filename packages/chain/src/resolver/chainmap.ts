@@ -1,9 +1,11 @@
 import { ChainArtifact, getCAIPChain } from "./caip";
+import { plugin } from "../plugin";
+import { OiPlugin } from "@openibex/core";
 
 // Restructure the configuration for easier lookup
 const chainMap = {};
 
-export function createChainMap(config) {
+plugin.onInit('chainmap', async (name: string, config: any, plugin: OiPlugin) : Promise<void> => {
   for (const namespace in config) {
     chainMap[namespace] = {};
     
@@ -12,7 +14,7 @@ export function createChainMap(config) {
       chainMap[namespace][chainId.toString()] = chainName;
     }
   }
-}
+});
 
 // Function to get the chain name
 export function getChainName(chainArtifact: ChainArtifact) {

@@ -5,7 +5,7 @@ import { getChainProvider } from './providers';
 
 import type { ChainArtifact, AssetArtifact } from './resolver';
 import { ChainId } from 'caip';
-import { coreApp } from './plugin';
+import { plugin } from './plugin';
 
 /**
  * Active subscriptions, required for connection sharing. If a subscription for the combination
@@ -42,7 +42,7 @@ export async function subscribeContract(
   const subscrId = getSubscriptionId(assetArtifact, eventName, filters);
 
   const chain = getCAIPChain(assetArtifact);
-  coreApp.log.info(`Subscribing to event ${eventName} contract ${assetArtifact.toString()}`);
+  plugin.log.info(`Subscribing to event ${eventName} contract ${assetArtifact.toString()}`);
 
   if (chain.namespace !== 'eip155') {
     throw new Error(`Unsupported blockchain ${chain.namespace}`);
@@ -51,7 +51,7 @@ export async function subscribeContract(
   if (!(subscrId in subscriptions)) {
     const contract: Contract = await getContract(assetArtifact);
     if (filters) {
-      coreApp.log.info(`Setting filters for ${assetArtifact.toString()}`);
+      plugin.log.info(`Setting filters for ${assetArtifact.toString()}`);
       await contract.filters[eventName](...filters);
     }
 
