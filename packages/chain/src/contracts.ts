@@ -28,6 +28,7 @@ export async function useABI(caipNamespace: string, caipAssetNamespace: string, 
  * Default instance type for Ethereum is an ethers contract.
  * 
  * @param assetArtifact Contract Account.
+ * @param walletName A valid signer / wallet if the contract should be writable.
  * @param abiName Name of the registered abi. Not required if the ABI is named after an asset namespace.
  * @returns Contract instance.
  */

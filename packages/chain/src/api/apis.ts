@@ -1,3 +1,4 @@
+import { isSupportedPlatform } from "../providers";
 import { type AssetArtifact, getCAIPAssetType } from "../resolver";
 import { OiApi } from "./api";
 import { OiErc20Api } from "./erc20";
@@ -36,13 +37,10 @@ export async function initAPIs(): Promise<void> {
  * @returns 
  */
 export async function getContractAPI(assetArtifact: AssetArtifact, walletName?: string): Promise<OiApi> {
-
+  isSupportedPlatform(assetArtifact);
+  
   const assetType = getCAIPAssetType(assetArtifact);
   const namespace = assetType.chainId.namespace;
-  
-  if (namespace !== 'eip155') {
-    throw new Error(`Unsupported namespace: ${namespace}`);
-  }  
 
   const api = contractAPIRegister[namespace][assetType.assetName.namespace];
   

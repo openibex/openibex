@@ -8,7 +8,7 @@ export function getMintAddress(chainArtifact: ChainArtifact) {
     return new AccountId({chainId, address: "0x0000000000000000000000000000000000000000" });
   }
 
-  throw Error(`Burn address for chain ${chainId.toString()}`);
+  throw Error(`Burn address undefined for chain ${chainId.toString()}.`);
 }
 
 export function getBurnAddress(chainArtifact: ChainArtifact) {
@@ -18,5 +18,5 @@ export function getBurnAddress(chainArtifact: ChainArtifact) {
     return new AccountId({chainId, address: "0xffffffffffffffffffffffffffffffffffffffff" });
   }
 
-  throw Error(`Burn address for chain ${chainId.toString()}`);
+  throw Error(`Burn address undefined for chain ${chainId.toString()}.`);
 }

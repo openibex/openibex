@@ -1,7 +1,7 @@
 import { Contract, id } from 'ethers';
 import { getCAIPChain } from './resolver';
 import { getContract } from './contracts';
-import { getChainProvider } from './providers';
+import { getChainProvider, isSupportedPlatform } from './providers';
 
 import type { ChainArtifact, AssetArtifact } from './resolver';
 import { ChainId } from 'caip';
@@ -26,7 +26,7 @@ export function getSubscriptionId(assetArtifact: AssetArtifact, eventName: strin
 }
 
 /**
- * Subscribes to a contract even. Subscription starts at current block.
+ * Subscribes to a contract event. Subscription starts at current block.
  * 
  * @param assetArtifact Asset type to subscribe to.
  * @param eventName Topic ABI in human-readable form.
@@ -39,14 +39,12 @@ export async function subscribeContract(
   callback: (...args: any[]) => void,
   filters?: any[]
 ) {
+  isSupportedPlatform(assetArtifact);
+
   const subscrId = getSubscriptionId(assetArtifact, eventName, filters);
 
   const chain = getCAIPChain(assetArtifact);
   plugin.log.info(`Subscribing to event ${eventName} contract ${assetArtifact.toString()}`);
-
-  if (chain.namespace !== 'eip155') {
-    throw new Error(`Unsupported blockchain ${chain.namespace}`);
-  }
 
   if (!(subscrId in subscriptions)) {
     const contract: Contract = await getContract(assetArtifact);
@@ -73,10 +71,12 @@ export async function subscribeBlocks(chainArtifact: ChainArtifact, callback: (c
   const provider = await getChainProvider(chainArtifact);
   const chain = getCAIPChain(chainArtifact);
 
-  if (chain.namespace !== 'eip155') throw Error(`Block Subscriber: Unsupported chain ${chain.namespace}`);
-
-  provider.on('block', (blockNumber: number) => {
-    callback(chain, blockNumber);
-  });
+  switch(chain.namespace) {
+    case 'eip155':
+      provider.on('block', (blockNumber: number) => {
+        callback(chain, blockNumber);
+      });
+      break;
+  }
 }
 

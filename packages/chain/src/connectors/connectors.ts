@@ -1,3 +1,4 @@
+import { isSupportedPlatform } from "../providers";
 import { AssetArtifact, getCAIPAssetType } from "../resolver";
 import { OiConnector, OiConnectorConf } from "./connector";
 
@@ -13,7 +14,6 @@ const connectorRegister: { [namespace: string]: { [connectorName: string]: typeo
  * @param namespace Namespace for the connector, defaults to 'eip155'
  */
 export async function useContractConnector(name: string, connector: typeof OiConnector, namespace: string = 'eip155') {
-
   if (!connectorRegister[namespace]) {
     connectorRegister[namespace] = {};
   }
@@ -29,10 +29,6 @@ export async function useContractConnector(name: string, connector: typeof OiCon
 export async function getContractConnector(assetArtifact: AssetArtifact, params: OiConnectorConf): Promise<OiConnector> {
   const assetType = getCAIPAssetType(assetArtifact);
   const namespace = assetType.chainId.namespace;
-  
-  if (namespace !== 'eip155') {
-    throw new Error(`Unsupported namespace: ${namespace}`);
-  }
 
   const connector = connectorRegister[namespace][assetType.assetName.namespace];
   
