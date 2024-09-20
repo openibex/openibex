@@ -1,28 +1,24 @@
-import { WebSocketProvider, JsonRpcProvider, getDefaultProvider } from 'ethers';
-import type { Provider as ProviderType } from 'ethers';
+import { WebSocketProvider, JsonRpcProvider, getDefaultProvider, Provider } from 'ethers';
+import { pluginConfig } from '../plugin';
+import { addProviderFactory } from './providers';
+import { OiProviderFactory } from './provider';
 
-interface ProvidersList {
-  [chainId: string]: {
-    [type: string]: ProviderType;
-  };
-}
+export class EthersFactory extends OiProviderFactory {
 
-export class EthersFactory {
-  static providers: ProvidersList = {};
-
-  static getProvider(
-    chainId: string,
+  public getProvider(
+    chainName: string,
     providerType: string = 'default',
-    className: string = 'WebSocketProvider',
     params: any
-  ): ProviderType {
+  ): Provider {
 
-    if (!(chainId in EthersFactory.providers)) {
-      EthersFactory.providers[chainId] = {};
+    if (!(chainName in this.providers)) {
+      this.providers[chainName] = {};
     }
 
-    if (!(providerType in EthersFactory.providers[chainId])) {
-      let provider: ProviderType;
+    const className = pluginConfig['eip155']['networks'][chainName].providers[providerType].className;
+
+    if (!(providerType in this.providers[chainName])) {
+      let provider: Provider;
 
       if (className === 'WebSocketProvider') {
         provider = new WebSocketProvider(params.endpoint);
@@ -34,9 +30,44 @@ export class EthersFactory {
         throw new Error(`Unsupported provider class name: ${className}`);
       }
 
-      EthersFactory.providers[chainId][providerType] = provider;
+      provider.on('error', handleEIP155Error);
+      this.providers[chainName][providerType] = provider;
     }
 
-    return EthersFactory.providers[chainId][providerType];
+    return this.providers[chainName][providerType];
   }
 }
+
+/**
+ * Error Handler for eip155 environments.
+ * 
+ * @param error any error thrown by the provider.
+ */
+function handleEIP155Error(error: any) {
+  // TODO: Error Handling (i.e. 429ers, connection lost etc.)
+  if (error.code) {
+    switch (error.code) {
+      case 'NETWORK_ERROR':
+        console.error("Network error:", error.message);
+        break;
+      case 'SERVER_ERROR':
+        console.error("Server error:", error.message);
+        break;
+      case 'TIMEOUT':
+        console.error("Timeout error:", error.message);
+        break;
+      case 'INVALID_ARGUMENT':
+        console.error("Invalid argument error:", error.message);
+        break;
+      case 'UNPREDICTABLE_GAS_LIMIT':
+        console.error("Unpredictable gas limit error:", error.message);
+        break;
+      default:
+        console.error("Unknown error:", error.message);
+    }
+  } else {
+    console.error("Error:", error.message || error);
+  }
+}
+
+addProviderFactory('eip155', new EthersFactory());

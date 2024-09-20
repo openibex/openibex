@@ -1,5 +1,6 @@
 import { ChainArtifact, getCAIPChain, getChainName } from '../resolver';
 import { pluginConfig } from '../plugin';
+import { isSupportedPlatform } from './providers';
 
 const rateLimiters: {
   [chainId: string]: {
@@ -8,6 +9,7 @@ const rateLimiters: {
 } = {};
 
 export function getRateLimiter(chainArtifact: ChainArtifact, providerType: string = 'default'): RateLimiter {
+  isSupportedPlatform(chainArtifact);
   const chain = getCAIPChain(chainArtifact);
   const chainName = getChainName(chain);
   const chainStr = chain.toString();
@@ -19,18 +21,15 @@ export function getRateLimiter(chainArtifact: ChainArtifact, providerType: strin
     return rateLimiters[chainStr][providerType];
   }
 
-  if (chain.namespace == 'eip155') {
-    const rateLimit = pluginConfig['eip155']['networks'][chainName].providers[providerType]['settings'].rateLimit;
-    rateLimiters[chainStr][providerType] = new RateLimiter(rateLimit);
+  const rateLimit = pluginConfig[chain.namespace]['networks'][chainName].providers[providerType]['settings'].rateLimit;
+  rateLimiters[chainStr][providerType] = new RateLimiter(rateLimit);
 
-    return rateLimiters[chainStr][providerType];
-  } else {
-    throw Error(`Network ${chain.toString()} is not yet supported`);
-  }
+  return rateLimiters[chainStr][providerType];
 }
 
 /**
- * Rate limiters are initiated once per network. 
+ * Rate limiters are initiated once per network. They're intended to limit heavy
+ * requests like eth_getLog. 
  */
 export class RateLimiter {
   private rateLimit: number;
@@ -44,6 +43,7 @@ export class RateLimiter {
   }
 
   /**
+   * Accepts a callback to queue and execute.
    * 
    * @param task 
    * @returns 

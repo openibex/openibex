@@ -1,12 +1,11 @@
-import { Contract, ContractEventPayload, DeferredTopicFilter, EventLog, Filter, Log } from 'ethers';
-import { getCAIPChain } from './resolver';
+import { Contract, ContractEventPayload, DeferredTopicFilter, EventLog } from 'ethers';
 import { getContract } from './contracts';
 import { AssetArtifact } from './resolver';
 import { getSubscriptionId, subscribeContract } from './subscriber';
 import { latestBlock } from './blocks';
 import { plugin } from './plugin';
 import { getNodeId, OiNKeyValue } from '@openibex/core';
-import { getRateLimiter } from './providers';
+import { getRateLimiter, isSupportedPlatform } from './providers';
 
 /**
  * Subscribes to a contract event and calls a processing callback. If processing is successfull log entry is added to processed index..
@@ -24,11 +23,7 @@ export async function indexEvents(
   fromBlock: number | string = 'latest',
   bloomFilters?: any
 ) {
-  const chain = getCAIPChain(assetArtifact);
-
-  if (chain.namespace !== 'eip155') {
-    throw new Error(`Unsupported blockchain ${chain.namespace}`);
-  }
+  isSupportedPlatform(assetArtifact);
 
   const subscriptionId = getSubscriptionId(assetArtifact, eventName, bloomFilters)
   const indexer: OiEventIndexer = new OiEventIndexer(assetArtifact, eventName, callback, bloomFilters)
