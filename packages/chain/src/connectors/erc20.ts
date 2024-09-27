@@ -1,5 +1,5 @@
 import { ERC20abi } from "../abi/erc20.abi";
-import { OiConnector, OiConnectorConf } from "./connector";
+import { OiContractConnector, OiContractConnectorParams } from "./connector";
 import { useContractConnector } from "./connectors";
 import { AssetArtifact, lookupCaipTag } from "../resolver";
 import { useABI } from "../contracts";
@@ -15,9 +15,9 @@ import { EventLog } from "ethers";
  * - Holders: All holders in that block and on-chain as trie. As well a holders table that represents latest status.
  *
  */
-export class OiErc20 extends OiConnector {
+export class OiErc20 extends OiContractConnector {
 
-  constructor(assetArtifact: AssetArtifact, params: OiConnectorConf) {
+  constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams) {
     super(assetArtifact, params);
     super.addPrimitive('Transfer', new OiChainTokenSupply(assetArtifact, params?.index));
   }

@@ -1,5 +1,3 @@
-export { getChainProvider, getProviderSetting, isSupportedPlatform } from './providers';
-export { getRateLimiter, RateLimiter } from "./ratelimiter";
-
-// Importing provider factories to have them initialized.
-import './ethereum';
+export { getChainProvider, getProviderSetting, isSupportedPlatform, addProviderFactory } from './providers';
+export { OiProviderFactory, OiProvidersList } from './provider';
+export { getRateLimiter, OiRateLimiter } from "./ratelimiter";

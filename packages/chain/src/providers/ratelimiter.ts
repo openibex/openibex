@@ -4,11 +4,18 @@ import { isSupportedPlatform } from './providers';
 
 const rateLimiters: {
   [chainId: string]: {
-    [type: string]: RateLimiter;
+    [type: string]: OiRateLimiter;
   };
 } = {};
 
-export function getRateLimiter(chainArtifact: ChainArtifact, providerType: string = 'default'): RateLimiter {
+/**
+ * Returns a rate limiter for a specific provider on a specific chain.
+ * 
+ * @param chainArtifact Chain is determined from the passed ChainArtifact.
+ * @param providerType Provider type according to config.
+ * @returns 
+ */
+export function getRateLimiter(chainArtifact: ChainArtifact, providerType: string = 'default'): OiRateLimiter {
   isSupportedPlatform(chainArtifact);
   const chain = getCAIPChain(chainArtifact);
   const chainName = getChainName(chain);
@@ -22,7 +29,7 @@ export function getRateLimiter(chainArtifact: ChainArtifact, providerType: strin
   }
 
   const rateLimit = pluginConfig[chain.namespace]['networks'][chainName].providers[providerType]['settings'].rateLimit;
-  rateLimiters[chainStr][providerType] = new RateLimiter(rateLimit);
+  rateLimiters[chainStr][providerType] = new OiRateLimiter(rateLimit);
 
   return rateLimiters[chainStr][providerType];
 }
@@ -31,7 +38,7 @@ export function getRateLimiter(chainArtifact: ChainArtifact, providerType: strin
  * Rate limiters are initiated once per network. They're intended to limit heavy
  * requests like eth_getLog. 
  */
-export class RateLimiter {
+export class OiRateLimiter {
   private rateLimit: number;
   private interval: number = 60000;
   private queue: Array<{ task: () => Promise<any>, resolve: (value: any) => void, reject: (reason?: any) => void }> = [];
@@ -45,7 +52,7 @@ export class RateLimiter {
   /**
    * Accepts a callback to queue and execute.
    * 
-   * @param task 
+   * @param task Async callback.
    * @returns 
    */
   public execute<T>(task: () => Promise<T>): Promise<T> {

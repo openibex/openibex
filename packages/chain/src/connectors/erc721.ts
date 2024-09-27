@@ -1,5 +1,5 @@
 import { ERC721abi } from "../abi/erc721.abi";
-import { OiConnector } from "./connector";
+import { OiContractConnector } from "./connector";
 import { useABI } from "../contracts";
 import { useContractConnector } from "./connectors";
 
@@ -9,7 +9,7 @@ import { useContractConnector } from "./connectors";
  */
 useABI('eip155', 'erc721', ERC721abi);
 
-export class OiErc721 extends OiConnector {
+export class OiErc721 extends OiContractConnector {
   
   
 }

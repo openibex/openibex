@@ -8,7 +8,7 @@ const providerFactories: Record<string, OiProviderFactory> = {};
  * Add a platform specific provider factory.
  * 
  * @param platform Platform of the factory.
- * @param factory 
+ * @param factory Factory instance.
  */
 export function addProviderFactory(platform: string, factory: OiProviderFactory) {
     providerFactories[platform] = factory;
@@ -48,7 +48,8 @@ export async function getChainProvider(chainArtifact: ChainArtifact, providerTyp
   
     try {
         const provider = providerFactories[chain.namespace].getProvider(
-        getChainName(chain),
+        chainName,
+        pluginConfig['eip155']['networks'][chainName],
         providerType,
         pluginConfig[chain.namespace]['networks'][chainName].providers[providerType].params
         );
@@ -60,10 +61,11 @@ export async function getChainProvider(chainArtifact: ChainArtifact, providerTyp
   }
   
   /**
+   * Returns a configuration for the specified provider type a specific chain.
    * 
-   * @param chainArtifact 
-   * @param settingName 
-   * @param providerType 
+   * @param chainArtifact Any chain address, protocol or token.
+   * @param settingName Name of the setting to retrieve.
+   * @param providerType Provider type as in config.
    * @returns 
    */
   export function getProviderSetting(chainArtifact: ChainArtifact, settingName: string, providerType: string = 'default'): any {
