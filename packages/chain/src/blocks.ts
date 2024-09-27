@@ -3,7 +3,6 @@ import { getCAIPChain } from "./resolver";
 import type {ChainArtifact} from "./resolver";
 import { getChainProvider } from "./providers";
 import { subscribeBlocks } from "./subscriber";
-import { isSupportedPlatform } from "./providers";
 
 let blocks: {[key: string]: number} = {};
 

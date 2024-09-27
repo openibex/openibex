@@ -5,13 +5,13 @@ import { indexEvents } from "../indexer";
 import { OiBlockchainPrimitive } from "../primitives/blockchain";
 import { EventLog } from "ethers";
 
-export type OiConnectorConf = {
+export type OiContractConnectorParams = {
   resolve?: boolean,
   index?: boolean,
   filter?: string[][]
 }
 
-export class OiConnector {
+export class OiContractConnector {
   protected assetNamespace: string;
   protected caipNamespace: string;
   protected assetArtifact: AssetArtifact;
@@ -22,7 +22,7 @@ export class OiConnector {
   protected indexer: boolean;
   protected resolver: boolean;
 
-  constructor(assetArtifact: AssetArtifact, params: OiConnectorConf) {
+  constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams) {
     this.assetArtifact = assetArtifact;
     
     this.assetNamespace = this.assetArtifact.assetName.namespace;

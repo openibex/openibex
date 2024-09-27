@@ -1,11 +1,11 @@
 import { Contract, id } from 'ethers';
-import { getCAIPChain } from './resolver';
-import { getContract } from './contracts';
-import { getChainProvider, isSupportedPlatform } from './providers';
+import { getCAIPChain } from '../resolver';
+import { getContract } from '../contracts';
+import { getChainProvider, isSupportedPlatform } from '../providers';
 
-import type { ChainArtifact, AssetArtifact } from './resolver';
+import type { ChainArtifact, AssetArtifact } from '../resolver';
 import { ChainId } from 'caip';
-import { plugin } from './plugin';
+import { plugin } from '../plugin';
 
 /**
  * Active subscriptions, required for connection sharing. If a subscription for the combination

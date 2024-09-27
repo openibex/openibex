@@ -1,8 +1,8 @@
 import { isSupportedPlatform } from "../providers";
 import { AssetArtifact, getCAIPAssetType } from "../resolver";
-import { OiConnector, OiConnectorConf } from "./connector";
+import { OiContractConnector, OiContractConnectorParams } from "./connector";
 
-const connectorRegister: { [namespace: string]: { [connectorName: string]: typeof OiConnector } } = {
+const connectorRegister: { [namespace: string]: { [connectorName: string]: typeof OiContractConnector } } = {
   eip1155: {}
 };
 
@@ -13,7 +13,7 @@ const connectorRegister: { [namespace: string]: { [connectorName: string]: typeo
  * @param connector ABI definition in chain specific format
  * @param namespace Namespace for the connector, defaults to 'eip155'
  */
-export async function useContractConnector(name: string, connector: typeof OiConnector, namespace: string = 'eip155') {
+export async function useContractConnector(name: string, connector: typeof OiContractConnector, namespace: string = 'eip155') {
   if (!connectorRegister[namespace]) {
     connectorRegister[namespace] = {};
   }
@@ -26,7 +26,7 @@ export async function useContractConnector(name: string, connector: typeof OiCon
  * @param assetArtifact 
  * @returns 
  */
-export async function getContractConnector(assetArtifact: AssetArtifact, params: OiConnectorConf): Promise<OiConnector> {
+export async function getContractConnector(assetArtifact: AssetArtifact, params: OiContractConnectorParams): Promise<OiContractConnector> {
   const assetType = getCAIPAssetType(assetArtifact);
   const namespace = assetType.chainId.namespace;
 

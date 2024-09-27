@@ -2,7 +2,7 @@ import { type AssetArtifact, type ChainArtifact } from "./resolver";
 import { getChainProvider } from "./providers";
 import { getContractConnector } from "./connectors";
 import { getContractAPI } from "./api";
-import { OiConnectorConf } from "./connectors/connector";
+import { OiContractConnectorParams } from "./connectors/connector";
 
 export class OiChain {
   /**
@@ -10,7 +10,7 @@ export class OiChain {
    * 
    * @param assetArtifact Any chain artifact.
    */
-  public async connect(assetArtifact: AssetArtifact, params: OiConnectorConf = {}) {
+  public async connect(assetArtifact: AssetArtifact, params: OiContractConnectorParams = {}) {
     const connector = await getContractConnector(assetArtifact, params);
     await connector.init();
     return connector;

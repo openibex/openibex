@@ -1,12 +1,20 @@
 import { WebSocketProvider, JsonRpcProvider, getDefaultProvider, Provider } from 'ethers';
-import { pluginConfig } from '../plugin';
-import { addProviderFactory } from './providers';
-import { OiProviderFactory } from './provider';
+import { addProviderFactory, OiProviderFactory, OiProvidersList } from '@openibex/chain';
 
-export class EthersFactory extends OiProviderFactory {
+export class EthersProviderFactory extends OiProviderFactory {
+  protected providers: OiProvidersList = {};
 
+  /**
+   * Returns a specific instance of the provider.
+   * 
+   * @param chainName Which chain the provider is configured for.
+   * @param chainConfig Chain configurations.
+   * @param providerType Type (defaults to default)
+   * @param params Provider parameters (if any)
+   */
   public getProvider(
     chainName: string,
+    chainConfig: any,
     providerType: string = 'default',
     params: any
   ): Provider {
@@ -15,7 +23,7 @@ export class EthersFactory extends OiProviderFactory {
       this.providers[chainName] = {};
     }
 
-    const className = pluginConfig['eip155']['networks'][chainName].providers[providerType].className;
+    const className = chainConfig.providers[providerType].className;
 
     if (!(providerType in this.providers[chainName])) {
       let provider: Provider;
@@ -70,4 +78,4 @@ function handleEIP155Error(error: any) {
   }
 }
 
-addProviderFactory('eip155', new EthersFactory());
+addProviderFactory('eip155', new EthersProviderFactory());

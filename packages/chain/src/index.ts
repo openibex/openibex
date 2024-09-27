@@ -2,7 +2,8 @@ import { initAPIs } from './api';
 import { OiChain } from './chains';
 
 // Low level API for module development
-export { getChainProvider } from './providers';
+export { getChainProvider, addProviderFactory, getRateLimiter } from './providers';
+export { addPlatformIndexer, indexEvents } from './indexer';
 export { getContract, useABI } from './contracts';
 export { useContractConnector, getContractConnector } from './connectors';
 export { latestBlock } from './blocks';
@@ -15,6 +16,8 @@ export { subscribeBlocks, getSubscriptionId, subscribeContract } from './subscri
 export { initWallets } from './wallets'
 
 export { OiConnector } from './connectors';
+export { OiProviderFactory, OiProvidersList } from './providers';
+export { OiEventIndexer } from './indexer';
 
 // Users use OiChain to access the blockchain.
 export { OiChain } from './chains';

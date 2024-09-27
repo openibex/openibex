@@ -12,6 +12,7 @@ import { startOpenIbex } from './start';
 import { executeArgs, executeContractFunction } from './execute';
 
 import '@openibex/chain';
+import '@openibex/ethereum';
 
 async function loadConfig(): Promise<OiConfig> {
   const configFile = fs.readFileSync('config.yaml', 'utf8');
