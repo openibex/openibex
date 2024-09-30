@@ -17,6 +17,7 @@ const platformIndexers: Record<string, new (assetArtifact: AssetArtifact, eventN
 export function addPlatformIndexer(platform: string, indexerClass: new (assetArtifact: AssetArtifact, eventName: string, callback:  (...args: any[]) => Promise<void> , bloomFilters?: any) => OiEventIndexer) {
     platformIndexers[platform] = indexerClass;
 }
+
 /**
  * Subscribes to a contract event and calls a processing callback. If processing is successfull log entry is added to processed index..
  * 

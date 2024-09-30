@@ -1,9 +1,7 @@
-import { OiPrimitive } from "@openibex/core";
 import { AssetArtifact, ChainArtifact, tagCaipArtifact, addCaipTagResolver} from "../resolver";
 import { subscribeContract } from "../subscriber";
 import { indexEvents } from "../indexer";
 import { OiBlockchainPrimitive } from "../primitives/blockchain";
-import { EventLog } from "ethers";
 
 export type OiContractConnectorParams = {
   resolve?: boolean,

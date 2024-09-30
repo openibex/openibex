@@ -1,28 +1,37 @@
-import { Contract, id } from 'ethers';
 import { getCAIPChain } from '../resolver';
-import { getContract } from '../contracts';
-import { getChainProvider, isSupportedPlatform } from '../providers';
+import { isSupportedPlatform } from '../providers';
 
 import type { ChainArtifact, AssetArtifact } from '../resolver';
 import { ChainId } from 'caip';
-import { plugin } from '../plugin';
+import { OiSubscriberFactory } from './subscriber';
+
+const subscriberFactories: Record<string, OiSubscriberFactory> = {};
 
 /**
- * Active subscriptions, required for connection sharing. If a subscription for the combination
- * of contract, eventName and filter is already initialized, the callback is attached to that
- * subscription and no new one is opened.
- */
-const subscriptions: Record<string, any> = {};
-
-/**
- * Generates an unique id for address / filters used.
+ * Add a platform specific provider factory.
  * 
- * @param assetArtifact ChainArtifact the subscription is for.
- * @param filters (Topic) Filters used.
- * @returns 
+ * @param platform Platform of the factory.
+ * @param factory Factory instance.
  */
+export function addSubscriberFactory(platform: string, factory: OiSubscriberFactory) {
+    subscriberFactories[platform] = factory;
+}
+
+function checkSubscriberFactory(chainId: ChainId) {
+  if (!(chainId.namespace in subscriberFactories))
+    throw Error(`No subscriber factory registered for platform ${chainId.namespace}`);
+}
+
+/**
+   * Generates an unique id for address / filters used.
+   * 
+   * @param assetArtifact ChainArtifact the subscription is for.
+   * @param filters (Topic) Filters used.
+   * @returns 
+   */
 export function getSubscriptionId(assetArtifact: AssetArtifact, eventName: string = '*', filters?: any[]) {
-  return id(`${assetArtifact.toString()}.${eventName}.${filters ? JSON.stringify(filters): ''}`);
+  checkSubscriberFactory(assetArtifact.chainId);
+  return subscriberFactories[assetArtifact.chainId.namespace].getSubscriptionId(assetArtifact, eventName, filters);
 }
 
 /**
@@ -40,24 +49,9 @@ export async function subscribeContract(
   filters?: any[]
 ) {
   isSupportedPlatform(assetArtifact);
+  checkSubscriberFactory(assetArtifact.chainId);
 
-  const subscrId = getSubscriptionId(assetArtifact, eventName, filters);
-
-  const chain = getCAIPChain(assetArtifact);
-  plugin.log.info(`Subscribing to event ${eventName} contract ${assetArtifact.toString()}`);
-
-  if (!(subscrId in subscriptions)) {
-    const contract: Contract = await getContract(assetArtifact);
-    if (filters) {
-      plugin.log.info(`Setting filters for ${assetArtifact.toString()}`);
-      await contract.filters[eventName](...filters);
-    }
-
-    subscriptions[subscrId] = contract;
-  }
-
-  const subscrContract = subscriptions[subscrId];
-  return await subscrContract.on(eventName, callback);
+  return await subscriberFactories[assetArtifact.chainId.namespace].subscribeContract(assetArtifact, eventName, callback, filters);
 }
 
 /**
@@ -68,15 +62,9 @@ export async function subscribeContract(
  * @param callback 
  */
 export async function subscribeBlocks(chainArtifact: ChainArtifact, callback: (chainId: ChainId, block: number) => void) {
-  const provider = await getChainProvider(chainArtifact);
   const chain = getCAIPChain(chainArtifact);
+  checkSubscriberFactory(chain);
 
-  switch(chain.namespace) {
-    case 'eip155':
-      provider.on('block', (blockNumber: number) => {
-        callback(chain, blockNumber);
-      });
-      break;
-  }
+  await subscriberFactories[chain.namespace].subscribeBlocks(chainArtifact, callback);
 }
 
