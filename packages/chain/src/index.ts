@@ -4,11 +4,11 @@ import { OiChain } from './chains';
 // Low level API for module development
 export { getChainProvider, addProviderFactory, getRateLimiter } from './providers';
 export { addPlatformIndexer, indexEvents } from './indexer';
-export { getContract, useABI } from './contracts';
+export { addContractFactory, useABI, getContract, OiContractFactory } from './contracts';
 export { useContractConnector, getContractConnector } from './connectors';
 export { latestBlock } from './blocks';
-export { getCAIPAssetType, getCAIPChain} from './resolver';
-export { subscribeBlocks, getSubscriptionId, subscribeContract } from './subscriber';
+export { getCAIPAssetType, getCAIPChain, isAssetId, isAssetType, isChainId} from './resolver';
+export { subscribeBlocks, getSubscriptionId, subscribeContract, addSubscriberFactory, OiSubscriberFactory } from './subscriber';
 
 // TODO with proper PluginStructure
 // initWallets shall be done internally in this file

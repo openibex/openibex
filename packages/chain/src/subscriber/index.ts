@@ -1,1 +1,2 @@
-export { subscribeBlocks, getSubscriptionId, subscribeContract } from "./subscribers";
+export { subscribeBlocks, getSubscriptionId, subscribeContract, addSubscriberFactory } from "./subscribers";
+export { OiSubscriberFactory } from "./subscriber";
