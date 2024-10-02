@@ -1,13 +1,13 @@
 import { Contract, Provider } from "ethers";
 import { AccountId } from "caip";
-import { getCAIPAssetType, getChainProvider, AssetArtifact, OiContractFactory } from "@openibex/chain";
+import { getCAIPAssetType, getChainProvider, AssetArtifact, OiContractFactory, addContractFactory } from "@openibex/chain";
 import { isAssetId, isAssetType } from "@openibex/chain/dist/resolver";
 import { getWallet } from "@openibex/chain/dist/wallets";
 
 /**
  * Contract factory.
  */
-export class OiEthereumContractFactory extends OiContractFactory {
+export class EthereumContractFactory extends OiContractFactory {
 
   private abiRegister: Record<string, any> = {}
 
@@ -57,4 +57,4 @@ export class OiEthereumContractFactory extends OiContractFactory {
   }
 }
 
-
+addContractFactory('eip155', new EthereumContractFactory());

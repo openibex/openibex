@@ -16,7 +16,7 @@ export function addContractFactory(platform: string, factory: OiContractFactory)
 
 function checkContractFactory(caipNamespace: string) {
   if (!(caipNamespace in contractFactories))
-    throw Error(`No subscriber factory registered for platform ${caipNamespace}`);
+    throw Error(`No contract factory registered for platform ${caipNamespace}`);
 }
 
 /**

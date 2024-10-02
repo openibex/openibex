@@ -1,7 +1,6 @@
 import { isSupportedPlatform } from "../providers";
 import { type AssetArtifact, getCAIPAssetType } from "../resolver";
 import { OiApi } from "./api";
-import { OiErc20Api } from "./erc20";
 
 const contractAPIRegister: { [namespace: string]: { [connectorName: string]: typeof OiApi } } = {
   eip1155: {}
@@ -22,11 +21,7 @@ export async function useContractAPI(name: string, api: typeof OiApi, namespace:
   contractAPIRegister[namespace][name] = api;
 }
 
-
 export async function initAPIs(): Promise<void> {
-  // Add build in APIs
-  // FIXME this needs to be somewhere else!!
-  await useContractAPI("erc20", OiErc20Api)
 }
 
 

@@ -1,11 +1,7 @@
-import { ERC20abi } from "../abi/erc20.abi";
-import { OiContractConnector, OiContractConnectorParams } from "./connector";
-import { useContractConnector } from "./connectors";
-import { AssetArtifact, lookupCaipTag } from "../resolver";
-import { useABI } from "../contracts";
+import { ERC20abi } from "./abi";
+import { AssetArtifact, lookupCaipTag, useABI, useContractConnector,  OiChainTokenSupply, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
 import { plugin } from "../plugin";
 import { AccountId } from "caip";
-import { OiChainTokenSupply } from "../primitives/supply";
 import { EventLog } from "ethers";
 
 /**

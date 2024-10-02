@@ -27,7 +27,6 @@
     "@orbitdb/core": "^2.2.0",
     "@types/node": "^20.12.13",
     "caip": "^1.1.1",
-    "ethers": "^6.13.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },

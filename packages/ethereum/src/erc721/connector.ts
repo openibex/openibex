@@ -1,7 +1,6 @@
-import { ERC721abi } from "../abi/erc721.abi";
-import { OiContractConnector } from "./connector";
-import { useABI } from "../contracts";
-import { useContractConnector } from "./connectors";
+import { ERC721abi } from "./abi";
+import { OiContractConnector, useABI, useContractConnector } from "@openibex/chain";
+
 
 /**
  * A connector registers all the ABIs it uses.
