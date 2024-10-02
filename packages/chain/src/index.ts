@@ -1,23 +1,27 @@
-import { initAPIs } from './api';
 import { OiChain } from './chains';
 
 // Low level API for module development
 export { getChainProvider, addProviderFactory, getRateLimiter } from './providers';
 export { addPlatformIndexer, indexEvents } from './indexer';
-export { addContractFactory, useABI, getContract, OiContractFactory } from './contracts';
+export { addContractFactory, useABI, getContract } from './contracts';
 export { useContractConnector, getContractConnector } from './connectors';
 export { latestBlock } from './blocks';
-export { getCAIPAssetType, getCAIPChain, isAssetId, isAssetType, isChainId} from './resolver';
-export { subscribeBlocks, getSubscriptionId, subscribeContract, addSubscriberFactory, OiSubscriberFactory } from './subscriber';
+export { getCAIPAssetType, getCAIPChain, lookupCaipTag, isAssetId, isAssetType, isChainId} from './resolver';
+export { subscribeBlocks, getSubscriptionId, subscribeContract, addSubscriberFactory } from './subscriber';
+export { useContractAPI, getContractAPI } from './api';
 
 // TODO with proper PluginStructure
 // initWallets shall be done internally in this file
 // remove export!
 export { initWallets } from './wallets'
 
-export { OiConnector } from './connectors';
+export { OiContractFactory } from './contracts';
+export { OiContractConnector, OiContractConnectorParams } from './connectors';
+export { OiChainTokenSupply } from './primitives/supply';
 export { OiProviderFactory, OiProvidersList } from './providers';
 export { OiEventIndexer } from './indexer';
+export { OiSubscriberFactory } from './subscriber';
+export { OiApi } from './api';
 
 // Users use OiChain to access the blockchain.
 export { OiChain } from './chains';
@@ -39,7 +43,7 @@ export async function getOiChain(): Promise<OiChain> {
   if(!chain) {
     chain = new OiChain();
     // Make sure APIs are available.
-    await initAPIs();
+    // await initAPIs();
 
     //TODO once proper plugin-structure is available
     // init wallets here via

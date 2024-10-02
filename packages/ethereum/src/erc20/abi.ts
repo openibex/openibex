@@ -1,5 +1,3 @@
-import { useABI } from "../contracts";
-
 export const ERC20abi = [
   {
     constant: true,

@@ -1,7 +1,7 @@
 import { WebSocketProvider, JsonRpcProvider, getDefaultProvider, Provider } from 'ethers';
 import { addProviderFactory, OiProviderFactory, OiProvidersList } from '@openibex/chain';
 
-export class EthersProviderFactory extends OiProviderFactory {
+export class EthereumProviderFactory extends OiProviderFactory {
   protected providers: OiProvidersList = {};
 
   /**
@@ -78,4 +78,4 @@ function handleEIP155Error(error: any) {
   }
 }
 
-addProviderFactory('eip155', new EthersProviderFactory());
+addProviderFactory('eip155', new EthereumProviderFactory());
