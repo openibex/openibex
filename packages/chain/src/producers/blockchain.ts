@@ -1,8 +1,8 @@
-import { OiPrimitive } from "@openibex/core";
+import { OiDataProducer } from "@openibex/core";
 import { AssetArtifact, tagCaipArtifact } from "../resolver";
 import { pluginName, pluginNamespace } from "../plugin";
 
-export class OiBlockchainPrimitive extends OiPrimitive {
+export class OiBlockchainPrimitive extends OiDataProducer {
   protected index: boolean;
   protected assetArtifact: AssetArtifact;
   protected assetArtifactTag: string;

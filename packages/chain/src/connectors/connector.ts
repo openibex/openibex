@@ -1,7 +1,7 @@
 import { AssetArtifact, ChainArtifact, tagCaipArtifact, addCaipTagResolver} from "../resolver";
 import { subscribeContract } from "../subscriber";
 import { indexEvents } from "../indexer";
-import { OiBlockchainPrimitive } from "../primitives/blockchain";
+import { OiBlockchainPrimitive } from "../producers/blockchain";
 
 export type OiContractConnectorParams = {
   resolve?: boolean,

@@ -3,7 +3,7 @@ import { KeyValue } from "@orbitdb/core";
 import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./core.config";
 import { initPlugins, OiPlugin, registerOiPlugin, type OiCoreSchema } from "./plugins";
 import { openDatabase, registerDatabaseTypes } from "./db";
-import { getPrimitive } from "./primitives";
+import { getProducer } from "./producers";
 
 /**
  * A simplistic Logger Interface compatible with standard loggers out there
@@ -131,7 +131,7 @@ export class OiCore extends OiPlugin {
    * @param namespace Namespace (system config as default, otherwise plugin namespace)
    * @param tag Tag, will be added to the name for entity-specific settings. (i.e. a connector setting that can be changed per contract.)
    */
-  public async getPrimitive(name: string, pluginName: string = 'core', namespace: string = this.dbConf.namespace, tag?: string) {
-    getPrimitive(name, pluginName, namespace, tag);
+  public async getProducer(name: string, pluginName: string = 'core', namespace: string = this.dbConf.namespace, tag?: string) {
+    getProducer(name, pluginName, namespace, tag);
   }
 }

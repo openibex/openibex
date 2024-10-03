@@ -17,7 +17,7 @@ export { initWallets } from './wallets'
 
 export { OiContractFactory } from './contracts';
 export { OiContractConnector, OiContractConnectorParams } from './connectors';
-export { OiChainTokenSupply } from './primitives/supply';
+export { OiChainTokenSupply } from './producers/supply';
 export { OiProviderFactory, OiProvidersList } from './providers';
 export { OiEventIndexer } from './indexer';
 export { OiSubscriberFactory } from './subscriber';
