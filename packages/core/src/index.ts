@@ -5,8 +5,8 @@ export { OiPreload } from './init';
 
 export { registerOiPlugin, OiPlugin} from './plugins';
 
-export {OiPrimitive} from './primitives';
-export {usePrimitive, getPrimitive } from './primitives';
+export {OiDataProducer} from './producers';
+export {useProducer, getProducer } from './producers';
 
 // Database Types
 export type { OiDbElements, OiDbSchema, OiKeyValueExtended, OiNKeyValue  } from './db';

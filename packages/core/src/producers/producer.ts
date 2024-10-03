@@ -1,4 +1,4 @@
-export class OiPrimitive {
+export class OiDataProducer {
   
   protected dbNamespace: string;
   protected dbPlugin: string;
