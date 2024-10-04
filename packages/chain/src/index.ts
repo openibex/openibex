@@ -35,7 +35,7 @@ let chain: OiChain;
 
 /**
  * Singleton for chain instances, returns an OiChain which is used connect
- * smart contracts, retrieve primitives and initiate apis.
+ * smart contracts, retrieve producers / consumers and initiate apis.
  * 
  * @returns A chain instance.
  */

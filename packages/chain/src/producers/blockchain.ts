@@ -1,25 +1,25 @@
-import { OiDataProducer } from "@openibex/core";
+import { OiDataSeriesProducer } from "@openibex/core";
 import { AssetArtifact, tagCaipArtifact } from "../resolver";
 import { pluginName, pluginNamespace } from "../plugin";
 
-export class OiBlockchainPrimitive extends OiDataProducer {
+export class OiChainLogProducer extends OiDataSeriesProducer {
   protected index: boolean;
   protected assetArtifact: AssetArtifact;
   protected assetArtifactTag: string;
   
 
-  protected primitiveName: string;
+  protected producerName: string;
   protected pluginName: string;
   protected pluginNamespace: string;
 
   protected currentBlock: number = -1;
 
-  protected primitiveDb: any;
+  protected producerDb: any;
 
-  constructor(assetArtifact: AssetArtifact, primitiveName: string, index?: boolean, namespace = pluginNamespace, plugin = pluginName) {
-    super(pluginNamespace, pluginName, primitiveName, tagCaipArtifact(assetArtifact) as string);
+  constructor(assetArtifact: AssetArtifact, producerName: string, index?: boolean, namespace = pluginNamespace, plugin = pluginName) {
+    super(pluginNamespace, pluginName, producerName, tagCaipArtifact(assetArtifact) as string);
 
-    this.primitiveName = primitiveName;
+    this.producerName = producerName;
     this.pluginName = plugin;
     this.pluginNamespace = namespace;
 
