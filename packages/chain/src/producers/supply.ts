@@ -2,7 +2,7 @@ import { OiNKeyValue } from "@openibex/core";
 import { AssetArtifact, tagCaipArtifact } from "../resolver";
 import { pluginName, pluginNamespace } from "../plugin";
 import { EventLog } from "ethers";
-import { OiBlockchainPrimitive } from "./blockchain";
+import { OiChainLogProducer } from "./blockchain";
 import { plugin } from "../plugin";
 import { getBurnAddress, getMintAddress } from "../utils";
 
@@ -18,7 +18,7 @@ import { getBurnAddress, getMintAddress } from "../utils";
  */
 export type StateOfSupply = [number, any, any, number, any, any, number];
 
-export class OiChainTokenSupply extends OiBlockchainPrimitive {
+export class OiChainTokenSupply extends OiChainLogProducer {
 
   private burnAddrTag: string = '';
   private mintAddrTag: string = '';
@@ -49,7 +49,7 @@ export class OiChainTokenSupply extends OiBlockchainPrimitive {
   }
 
   /**
-   * Adds a a log to the primitive.
+   * Adds a a log to the producer.
    * 
    * @param params 
    */

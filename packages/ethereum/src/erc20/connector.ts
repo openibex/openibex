@@ -5,7 +5,7 @@ import { AccountId } from "caip";
 import { EventLog } from "ethers";
 
 /**
- * The OiErc20Connector is listening to the standard events of ERC20 and creates a few primitives:
+ * The OiErc20Connector is listening to the standard events of ERC20 and creates a few producers:
  * - Supply: All mints and burns, new supply and tries of all minters and burners in that block and whole chain.
  * - Transfers: Transfer volumes, all senders and recipients in that block and on chain until block.
  * - Holders: All holders in that block and on-chain as trie. As well a holders table that represents latest status.
@@ -15,11 +15,11 @@ export class OiErc20 extends OiContractConnector {
 
   constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams) {
     super(assetArtifact, params);
-    super.addPrimitive('Transfer', new OiChainTokenSupply(assetArtifact, params?.index));
+    super.addProducer('Transfer', new OiChainTokenSupply(assetArtifact, params?.index));
   }
 
   public async init() {
-    super.initPrimitives('Transfer');
+    super.initProducers('Transfer');
 
     super.index('Transfer', async (from: string, to: string, amount: bigint, event: EventLog) => {
       await super.saveBlock('Transfer', event.blockNumber);

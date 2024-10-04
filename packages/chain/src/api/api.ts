@@ -6,7 +6,7 @@ import { getContract } from "../contracts";
  * OiApi is a smart contract API wrapper, that wraps API functions in a chain-agnostic
  * manner.
  * 
- * It can use on-chain data as well as off-chain OrbitDB databases and primitives.
+ * It can use on-chain data as well as off-chain OrbitDB databases and producers / consumers.
  */
 export class OiApi {
 

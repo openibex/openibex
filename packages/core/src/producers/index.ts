@@ -1,2 +1,7 @@
 export {OiDataProducer} from './producer';
-export {useProducer, getProducer } from './producers';
+export {OiDataLogProducer} from './datalog';
+export {OiDataSeriesProducer} from './dataseries';
+export {OiDataKeyValueProducer } from './keyvalue';
+export {OiDataSetProducer} from './set';
+export {OiDataStoreProducer} from './store';
+export {OiPipelineProducer} from './pipeline';

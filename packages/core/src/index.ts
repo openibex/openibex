@@ -5,8 +5,9 @@ export { OiPreload } from './init';
 
 export { registerOiPlugin, OiPlugin} from './plugins';
 
-export {OiDataProducer} from './producers';
-export {useProducer, getProducer } from './producers';
+export {OiDataProducer, OiDataLogProducer, OiDataSeriesProducer, OiDataKeyValueProducer, OiDataSetProducer, OiDataStoreProducer, OiPipelineProducer } from './producers';
+export {OiDataConsumer, OiDataLogConsumer, OiDataKeyValueConsumer, OiDataSetConsumer, OiDataStoreConsumer, OiPipelineConsumer } from './consumers';
+
 
 // Database Types
 export type { OiDbElements, OiDbSchema, OiKeyValueExtended, OiNKeyValue  } from './db';
