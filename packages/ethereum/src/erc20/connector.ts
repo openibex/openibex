@@ -13,11 +13,20 @@ import { EventLog } from "ethers";
  */
 export class OiErc20 extends OiContractConnector {
 
+  /**
+   * Constructor.
+   * 
+   * @param assetArtifact AssetArtifact, has to be 'erc20' denominated.
+   * @param params 
+   */
   constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams) {
     super(assetArtifact, params);
     super.addProducer('Transfer', new OiChainTokenSupply(assetArtifact, params?.index));
   }
 
+  /**
+   * Ethereum-specific init method. Overwrites parent.
+   */
   public async init() {
     super.initProducers('Transfer');
 

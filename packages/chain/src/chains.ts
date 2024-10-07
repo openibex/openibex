@@ -4,6 +4,13 @@ import { getContractConnector } from "./connectors";
 import { getContractAPI } from "./api";
 import { OiContractConnectorParams } from "./connectors/connector";
 
+/**
+ * OiChain provides access to all chain resources (scrapers, protocols, APIs, accounts, blocks and transactions)
+ * that are present within OpenIbex.
+ * 
+ * It provides the main interface to program applications. Just use getOiChain() to retrieve a chain instance.
+ * 
+ */
 export class OiChain {
   /**
    * Connects to an Asset / Contract

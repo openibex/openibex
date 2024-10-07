@@ -5,6 +5,18 @@ import { plugin } from "../plugin";
 import { getProviderSetting, } from "../providers";
 import { AssetArtifact } from "../resolver";
 
+/**
+ * Generic indexer class. All other indexers are inherited from this class.
+ * The generic indexer remembers the last block, and distincts between historic
+ * imports and up to date event listening.
+ * 
+ * To create your own indexer (see @openibex/ethereum for an example) overwrite:
+ * - importBatch(startBlock: number, endBlock: number), historic import of events in batches.
+ * - subscribe(), live-event subscription, called once historic indexing is done.
+ * - protected async processEvent(...args: any[]), executed on each imported event in sequential order.
+ * 
+ * For a practical example check the ethereum package.
+ */
 export class OiEventIndexer{
   protected subscriptionId: string;
   protected assetArtifact: AssetArtifact;
@@ -16,6 +28,14 @@ export class OiEventIndexer{
 
   protected dbPeers: Record<string, number> = {};
 
+  /**
+   * Constructor for indexer instance.
+   * 
+   * @param assetArtifact Asset Artifact to index
+   * @param eventName event name to index
+   * @param callback Callback function to call on index
+   * @param bloomFilters Filters for import.
+   */
   public constructor(assetArtifact: AssetArtifact, eventName: string, callback:  (...args: any[]) => Promise<void> , bloomFilters?: any) {
     this.subscriptionId = getSubscriptionId(assetArtifact, eventName, bloomFilters)
     this.assetArtifact = assetArtifact;
@@ -50,13 +70,30 @@ export class OiEventIndexer{
     this.subscribe()
   }
 
+  /**
+   * Overwrite this method to implement provider specific historical import in batches.
+   * 
+   * @param startBlock Starting block of batch
+   * @param endBlock End block of batch.
+   * @returns 
+   */
   protected async importBatch(startBlock: number, endBlock: number): Promise<any[]> {
     return [];
   }
 
+  /**
+   * Overwrite this method to subscribe according to the provider defined way.
+   * It is called once historical import completed successfully and intended
+   * to connect the contract to its event subscribers.
+   */
   protected async subscribe() {
   }
 
+  /**
+   * Import historical events.
+   * 
+   * @param fromBlock Start block for import.
+   */
   protected async import(fromBlock: number) {
     let lastBlock: number = fromBlock - 1;
     const batchSize: number = getProviderSetting(this.assetArtifact, 'batchSize');
@@ -88,9 +125,10 @@ export class OiEventIndexer{
   }
 
   /**
-   * Internal method, checks the event and calls callbacks / updates blocks if applicable.
+   * Overwrite this method to process events. It is called in sequential order when events are
+   * imported.
    * 
-   * @param event 
+   * @param args - Platform specific argument set.
    */
   protected async processEvent(...args: any[]): Promise<void> { }
 }

@@ -1,6 +1,9 @@
 import { WebSocketProvider, JsonRpcProvider, getDefaultProvider, Provider } from 'ethers';
 import { addProviderFactory, OiProviderFactory, OiProvidersList } from '@openibex/chain';
 
+/**
+ * Provider factory for Ethereum, based on ethers.
+ */
 export class EthereumProviderFactory extends OiProviderFactory {
   protected providers: OiProvidersList = {};
 
