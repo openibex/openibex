@@ -2,18 +2,40 @@ import { AssetArtifact, getContract, OiEventIndexer, subscribeContract, getRateL
 import { plugin } from "./plugin";
 import { Contract, EventLog, ContractEventPayload } from "ethers";
 
+/**
+ * Ethereum-specific indexer using ethers.
+ */
 export class EthereumEventIndexer extends OiEventIndexer{
   private importer!: Contract;
   private importFilter: any;
 
+  /**
+   * Create an Ethereum indexer instance.
+   * 
+   * @param assetArtifact Asset artifact to index
+   * @param eventName Event name that is indexed.
+   * @param callback Callback in indexers processEvents()
+   * @param bloomFilters 
+   */
   public constructor(assetArtifact: AssetArtifact, eventName: string, callback:  (...args: any[]) => Promise<void> , bloomFilters?: any) {
     super(assetArtifact, eventName, callback, bloomFilters);
   }
 
+  /**
+   * Subscribe to the contract once indexing historical events is done.
+   * Called internally.
+   */
   protected async subscribe() {
     await subscribeContract(this.assetArtifact, this.eventName, async (...args: any) => { await this.processEvent(...args); }, this.bloomFilters);
   }
 
+  /**
+   * Import a batch of events.
+   * 
+   * @param startBlock Block to start historical index from.
+   * @param endBlock Block to end historical index with.
+   * @returns An array of events.
+   */
   protected async importBatch(startBlock: number, endBlock: number): Promise<any[]> {
     if(!this.importer) {
       this.importer = await getContract(this.assetArtifact);
@@ -30,7 +52,7 @@ export class EthereumEventIndexer extends OiEventIndexer{
   /**
    * Internal method, checks the event and calls callbacks / updates blocks if applicable.
    * 
-   * @param event 
+   * @param args 
    */
   protected async processEvent(
     ...args: any[]

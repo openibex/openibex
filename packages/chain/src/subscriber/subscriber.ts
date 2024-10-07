@@ -13,7 +13,8 @@ export abstract class OiSubscriberFactory {
   public abstract getSubscriptionId(assetArtifact: AssetArtifact, eventName: string, filters?: any[]): string;
 
   /**
-   * Generates an unique id for address / filters used.
+   * Subscribes to a contract with the filters specified. Subscription always comes from
+   * 'latest' block. Use indexer to import older blocks.
    * 
    * @param assetArtifact ChainArtifact the subscription is for.
    * @param filters (Topic) Filters used.

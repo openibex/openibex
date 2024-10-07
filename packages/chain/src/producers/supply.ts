@@ -2,7 +2,7 @@ import { OiNKeyValue } from "@openibex/core";
 import { AssetArtifact, tagCaipArtifact } from "../resolver";
 import { pluginName, pluginNamespace } from "../plugin";
 import { EventLog } from "ethers";
-import { OiChainLogProducer } from "./blockchain";
+import { OiChainLogProducer } from "./chainlog";
 import { plugin } from "../plugin";
 import { getBurnAddress, getMintAddress } from "../utils";
 
@@ -37,8 +37,8 @@ export class OiChainTokenSupply extends OiChainLogProducer {
 
   private supplyAmount: bigint = 0n;
 
-  constructor(assetArtifact: AssetArtifact, index?: boolean, namespace = pluginNamespace, plugin = pluginName) {
-    super(assetArtifact, 'supply', index, namespace, plugin);
+  constructor(assetArtifact: AssetArtifact, namespace = pluginNamespace, plugin = pluginName) {
+    super(assetArtifact, 'supply', namespace, plugin);
   }
 
   public async init() {

@@ -19,7 +19,7 @@ export function addPlatformIndexer(platform: string, indexerClass: new (assetArt
 }
 
 /**
- * Subscribes to a contract event and calls a processing callback. If processing is successfull log entry is added to processed index..
+ * Starts to run historical indexing and calls a processing callback for each event log.
  * 
  * @param assetArtifact Asset type to subscribe to.
  * @param eventName Topic ABI in human-readable form.

@@ -1,7 +1,7 @@
 import { AssetArtifact, ChainArtifact, tagCaipArtifact, addCaipTagResolver} from "../resolver";
 import { subscribeContract } from "../subscriber";
 import { indexEvents } from "../indexer";
-import { OiChainLogProducer } from "../producers/blockchain";
+import { OiChainLogProducer } from "../producers/chainlog";
 
 export type OiContractConnectorParams = {
   resolve?: boolean,
@@ -9,6 +9,10 @@ export type OiContractConnectorParams = {
   filter?: string[][]
 }
 
+/**
+ * Connectors orchestrate the indexer and the producers of a smart contract.
+ * 
+ */
 export class OiContractConnector {
   protected assetNamespace: string;
   protected caipNamespace: string;
