@@ -111,5 +111,5 @@ async function main() {
 
 await main().catch(err => {
   oiLogger.error(err);
-  yargs.exit(1, err);
+  yargs().exit(1, err);
 });
