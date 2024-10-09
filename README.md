@@ -17,11 +17,18 @@ $> yarn install; yarn build; yarn run oi init
 .... coreDB address: /orbitdb/xxxx
 ```
 
-Put your coreDB address into config.yaml. Once your application is initialized, connect to an ERC20 contract to get your index created:
+Once your application is initialized, edit the config and connect to an ERC-20 contract to create an index:
+
+- Specify your coreDB address (from output of `yarn run oi init`) as `database/address` in `config.yaml`
+- Replace the Node-URIs (`https://example.com/<someKey>`) through your actual nodes, e.g. `https://ethereum-mainnet.core.chainstack.com/<your-key>`
+
 
 ```bash
 $> yarn run oi start --connect eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
 ```
+
+Note it may take ~30s until you see the first Blockchain events dripping in.
+
 
 ### Initializing Apps
 
