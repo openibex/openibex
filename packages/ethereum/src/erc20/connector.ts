@@ -21,7 +21,7 @@ export class OiErc20 extends OiContractConnector {
    */
   constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams) {
     super(assetArtifact, params);
-    super.addProducer('Transfer', new OiChainTokenSupply(assetArtifact, params?.index));
+    super.addProducer('Transfer', new OiChainTokenSupply(assetArtifact));
   }
 
   /**
