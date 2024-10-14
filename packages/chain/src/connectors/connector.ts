@@ -1,28 +1,30 @@
-import { OiPrimitive } from "@openibex/core";
 import { AssetArtifact, ChainArtifact, tagCaipArtifact, addCaipTagResolver} from "../resolver";
 import { subscribeContract } from "../subscriber";
 import { indexEvents } from "../indexer";
-import { OiBlockchainPrimitive } from "../primitives/blockchain";
-import { EventLog } from "ethers";
+import { OiChainLogProducer } from "../producers/chainlog";
 
-export type OiConnectorConf = {
+export type OiContractConnectorParams = {
   resolve?: boolean,
   index?: boolean,
   filter?: string[][]
 }
 
-export class OiConnector {
+/**
+ * Connectors orchestrate the indexer and the producers of a smart contract.
+ * 
+ */
+export class OiContractConnector {
   protected assetNamespace: string;
   protected caipNamespace: string;
   protected assetArtifact: AssetArtifact;
 
   protected currentBlock: Record<string, number> = {};
-  protected primitives: Record<string, OiBlockchainPrimitive[]> = {};
+  protected producers: Record<string, OiChainLogProducer[]> = {};
 
   protected indexer: boolean;
   protected resolver: boolean;
 
-  constructor(assetArtifact: AssetArtifact, params: OiConnectorConf) {
+  constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams) {
     this.assetArtifact = assetArtifact;
     
     this.assetNamespace = this.assetArtifact.assetName.namespace;
@@ -60,39 +62,39 @@ export class OiConnector {
   public async init() {}
 
   /**
-   * Initialization of Primitives.
+   * Initialization of producers.
    */
-  protected async initPrimitives(event: string) {
-    this.primitives[event].forEach(async primitive => {
-      await primitive.init();
+  protected async initProducers(event: string) {
+    this.producers[event].forEach(async producer => {
+      await producer.init();
     });
   }
 
   /**
-   * Adds a primitive for later initialization.
+   * Adds a producer for later initialization.
    * 
-   * @param primitive instance of primitive.
+   * @param producer instance of producer.
    */
-  protected addPrimitive(event: string, primitive: OiBlockchainPrimitive) {
-    if(!this.primitives[event]) {
-      this.primitives[event] = [];
+  protected addProducer(event: string, producer: OiChainLogProducer) {
+    if(!this.producers[event]) {
+      this.producers[event] = [];
     }
-    this.primitives[event].push(primitive);
+    this.producers[event].push(producer);
   }
 
   /**
-   * Add an event to all primitives.
+   * Add an event to all producers.
    * 
    * @param event Event the log is for.
    * @param params Log Params
    * @returns 
    */
   protected async addLog(event: string, params: any) {
-    if (! this.primitives[event]) {
+    if (! this.producers[event]) {
       return;
     }
-    this.primitives[event].forEach(primitive => {
-      primitive.add(params);
+    this.producers[event].forEach(producer => {
+      producer.add(params);
     });
   }
 
@@ -100,11 +102,11 @@ export class OiConnector {
     if(!this.currentBlock[event]) {
       this.currentBlock[event] = blockNumber;
     } else if (this.currentBlock[event] < blockNumber) {
-      if (! this.primitives[event]) {
+      if (! this.producers[event]) {
         return;
       }
-      this.primitives[event].forEach(async primitive => {
-        await primitive.saveBlock(this.currentBlock[event]);
+      this.producers[event].forEach(async producer => {
+        await producer.saveBlock(this.currentBlock[event]);
       });
       this.currentBlock[event] = blockNumber;
     }

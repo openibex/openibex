@@ -3,10 +3,11 @@ export { startNode, stopNode, getNodeId} from './node';
 export { initApp } from './init';
 export { OiPreload } from './init';
 
-export { registerOiPlugin, isRegisteredPlugin, getPluginNamespace} from './plugins';
+export { registerOiPlugin, OiPlugin} from './plugins';
 
-export {OiPrimitive} from './primitives';
-export {usePrimitive, getPrimitive } from './primitives';
+export {OiDataProducer, OiDataLogProducer, OiDataSeriesProducer, OiDataKeyValueProducer, OiDataSetProducer, OiDataStoreProducer, OiPipelineProducer } from './producers';
+export {OiDataConsumer, OiDataLogConsumer, OiDataKeyValueConsumer, OiDataSetConsumer, OiDataStoreConsumer, OiPipelineConsumer } from './consumers';
+
 
 // Database Types
 export type { OiDbElements, OiDbSchema, OiKeyValueExtended, OiNKeyValue  } from './db';

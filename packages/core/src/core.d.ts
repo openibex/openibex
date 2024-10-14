@@ -1,8 +1,4 @@
-export type OiCoreSchema = { 
-  address: string; 
-  type: string; 
-  revision: number; 
-};
+
 
 export type OiValueSchema = { 
   datatype: string, 

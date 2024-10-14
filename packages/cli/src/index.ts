@@ -12,13 +12,25 @@ import { startOpenIbex } from './start';
 import { executeArgs, executeContractFunction } from './execute';
 
 import '@openibex/chain';
+import '@openibex/ethereum';
 
+/**
+ * Load the configuration from an yaml-file.
+ * 
+ * @returns An OpenIbex App configuration.
+ */
 async function loadConfig(): Promise<OiConfig> {
   const configFile = fs.readFileSync('config.yaml', 'utf8');
   const config = yaml.parse(configFile) as OiConfig;
   return config;
 }
 
+/**
+ * Loads preload.yaml with plugin-specific entries. I.e. plugin databases
+ * that are customized.
+ * 
+ * @returns An OiPreload object.
+ */
 async function loadPreloadValues(): Promise<OiPreload> {
   const configFile = fs.readFileSync('preload.yaml', 'utf8');
   const config = yaml.parse(configFile) as OiPreload;
@@ -99,5 +111,5 @@ async function main() {
 
 await main().catch(err => {
   oiLogger.error(err);
-  yargs.exit(1, err);
+  yargs().exit(1, err);
 });

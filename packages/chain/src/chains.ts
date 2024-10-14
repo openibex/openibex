@@ -2,15 +2,22 @@ import { type AssetArtifact, type ChainArtifact } from "./resolver";
 import { getChainProvider } from "./providers";
 import { getContractConnector } from "./connectors";
 import { getContractAPI } from "./api";
-import { OiConnectorConf } from "./connectors/connector";
+import { OiContractConnectorParams } from "./connectors/connector";
 
+/**
+ * OiChain provides access to all chain resources (scrapers, protocols, APIs, accounts, blocks and transactions)
+ * that are present within OpenIbex.
+ * 
+ * It provides the main interface to program applications. Just use getOiChain() to retrieve a chain instance.
+ * 
+ */
 export class OiChain {
   /**
    * Connects to an Asset / Contract
    * 
    * @param assetArtifact Any chain artifact.
    */
-  public async connect(assetArtifact: AssetArtifact, params: OiConnectorConf = {}) {
+  public async connect(assetArtifact: AssetArtifact, params: OiContractConnectorParams = {}) {
     const connector = await getContractConnector(assetArtifact, params);
     await connector.init();
     return connector;
@@ -26,7 +33,8 @@ export class OiChain {
   }
 
   /**
-   * Returns a chain provider. Only used if the API is not enough.
+   * Returns a chain provider in case if special functionality needs to be implemented,
+   * which is not covered by API.
    * 
    * @param chainArtifact Any chain artifact.
    * @param providerType Provider name according to configuration.
@@ -35,5 +43,4 @@ export class OiChain {
   public async getProvider(chainArtifact: ChainArtifact, providerType: string = 'default') {
     return await getChainProvider(chainArtifact, providerType)
   }
-
 }

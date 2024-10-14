@@ -1,2 +1,2 @@
-export { OiApi, OiEthereumApi } from './api';
-export { useContractAPI, getContractAPI, initAPIs } from './apis';
+export { OiApi } from './api';
+export { useContractAPI, getContractAPI } from './apis';

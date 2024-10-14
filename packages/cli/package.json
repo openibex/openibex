@@ -25,6 +25,7 @@
   "dependencies": {
     "@openibex/core": "^0.1.0",
     "@openibex/chain": "^0.1.0",
+    "@openibex/ethereum": "^0.1.0",
     "@orbitdb/core": "^2.2.0",
     "@types/node": "^20.12.13",
     "@types/winston": "^2.4.4",
