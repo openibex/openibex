@@ -1,13 +1,16 @@
 {
   "name": "@openibex/cli",
-  "version": "0.1.0",
-  "repository": "https://code.ibex.host/ibex-open/core.git",
+  "version": "0.0.4",
+  "repository": "https://github.com/openibex/openibex/",
   "bugs": {
-    "url": "https://code.ibex.host/ibex-open/core/issues"
+    "url": "https://github.com/openibex/openibex/issues"
   },
   "author": "Ibex Labs <office@ibex.host>",
   "license": "MIT",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
@@ -23,9 +26,9 @@
     "oi": "./dist/index.js"
   },
   "dependencies": {
-    "@openibex/core": "^0.1.0",
-    "@openibex/chain": "^0.1.0",
-    "@openibex/ethereum": "^0.1.0",
+    "@openibex/core": "^0.0.4",
+    "@openibex/chain": "^0.0.4",
+    "@openibex/ethereum": "^0.0.4",
     "@orbitdb/core": "^2.2.0",
     "@types/node": "^20.12.13",
     "@types/winston": "^2.4.4",

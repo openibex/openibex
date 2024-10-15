@@ -1,13 +1,16 @@
 {
   "name": "@openibex/core",
-  "version": "0.1.0",
-  "repository": "https://code.ibex.host/ibex-open/core.git",
+  "version": "0.0.4",
+  "repository": "https://github.com/openibex/openibex/",
   "bugs": {
-    "url": "https://code.ibex.host/ibex-open/core/issues"
+    "url": "https://github.com/openibex/openibex/issues"
   },
   "author": "Ibex Labs <office@ibex.host>",
   "license": "MIT",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
