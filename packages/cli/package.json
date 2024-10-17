@@ -17,7 +17,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "test": "jest",
     "clean": "npx rimraf node_modules dist",
     "oi": "tsx --watch index.ts"
