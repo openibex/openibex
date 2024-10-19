@@ -1,8 +1,9 @@
 import { ERC20abi } from "./abi";
-import { AssetArtifact, lookupCaipTag, useABI, useContractConnector,  OiChainTokenSupply, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
+import { AssetArtifact, lookupCaipTag, useABI, useContractConnector,  OiChainTokenSupply, OiContractConnector, OiContractConnectorParams, useContractAPI  } from "@openibex/chain";
 import { plugin } from "../plugin";
 import { AccountId } from "caip";
 import { EventLog } from "ethers";
+import { OiErc20Api } from "./api";
 
 /**
  * The OiErc20Connector is listening to the standard events of ERC20 and creates a few producers:
@@ -51,3 +52,4 @@ export class OiErc20 extends OiContractConnector {
 
 await useContractConnector('erc20', OiErc20, 'eip155');
 await useABI('eip155', 'erc20', ERC20abi);
+await useContractAPI('erc20', OiErc20Api, 'eip155');
