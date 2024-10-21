@@ -1,29 +1,28 @@
 {
   "name": "@openibex/chain",
-  "version": "0.1.0",
-  "repository": "https://code.ibex.host/ibex-open/core.git",
+  "version": "0.0.4",
+  "repository": "https://github.com/openibex/openibex/",
   "bugs": {
-    "url": "https://code.ibex.host/ibex-open/core/issues"
+    "url": "https://github.com/openibex/openibex/issues"
   },
   "author": "Ibex Labs <office@ibex.host>",
   "license": "MIT",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "test": "jest",
-    "clean": "npx rimraf node_modules dist",
-    "oi": "tsx --watch index.ts"
-  },
-  "bin": {
-    "oi": "./dist/index.js"
+    "clean": "npx rimraf node_modules dist"
   },
   "dependencies": {
-    "@openibex/core": "^0.1.0",
+    "@openibex/core": "^0.0.4",
     "@orbitdb/core": "^2.2.0",
     "@types/node": "^20.12.13",
     "caip": "^1.1.1",

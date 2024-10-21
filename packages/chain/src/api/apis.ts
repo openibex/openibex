@@ -3,7 +3,7 @@ import { type AssetArtifact, getCAIPAssetType } from "../resolver";
 import { OiApi } from "./api";
 
 const contractAPIRegister: { [namespace: string]: { [connectorName: string]: typeof OiApi } } = {
-  eip1155: {}
+  eip155: {}
 };
 
 /**

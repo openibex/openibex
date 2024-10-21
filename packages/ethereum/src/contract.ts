@@ -1,8 +1,7 @@
 import { Contract, Provider } from "ethers";
 import { AccountId } from "caip";
 import { getCAIPAssetType, getChainProvider, AssetArtifact, OiContractFactory, addContractFactory } from "@openibex/chain";
-import { isAssetId, isAssetType } from "@openibex/chain/dist/resolver";
-import { getWallet } from "@openibex/chain/dist/wallets";
+import { isAssetId, isAssetType, getWallet } from "@openibex/chain";
 
 /**
  * Contract factory.

@@ -24,7 +24,7 @@ export class OiEventIndexer{
   protected bloomFilters?: any;
   protected callback: (...args: any[]) => Promise<void>;
   
-  protected processedDB: OiNKeyValue<number>;
+  protected processedDB: OiNKeyValue<string>;
 
   protected dbPeers: Record<string, number> = {};
 
@@ -48,19 +48,29 @@ export class OiEventIndexer{
     this.processedDB = await plugin.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
 
     // Track peers that connect to this database, hence run indexers as well.
+    // FIXME @Lukas Argument of type '(peerId: any, heads: any) => Promise<void>' is not assignable to parameter of type 'never'.
+    // @ts-ignore 
     this.processedDB.events.on('join', async (peerId, heads) => {
       this.dbPeers[peerId] = Date.now();
     });
 
+    // FIXME @Lukas Argument of type '(peerId: any) => Promise<void>' is not assignable to parameter of type 'never'.
+    // @ts-ignore
     this.processedDB.events.on('leave', async (peerId) => {
       delete(this.dbPeers[peerId]);
     });
 
-    const returnValue = await this.processedDB.newest();
-    const key = (returnValue === undefined) ? 0 : returnValue.key;
+    // FIXME @Lukas
+    // This now always starts at zero - but it has done so in the past anyway, because
+    // the newest() method did not exist. Maybe you meant to use a different member variable?
+    // Property 'newest' does not exist on type 'OiNKeyValue<string>'.
+    //const returnValue = await this.processedDB.newest();
+    //const key = (returnValue === undefined) ? 0 : returnValue.key;
+
+    const key = 0;
 
     let lastBlock = key + 1
-    fromBlock = lastBlock > fromBlock ? lastBlock: fromBlock; 
+    fromBlock = lastBlock > Number(fromBlock) ? lastBlock: fromBlock; 
 
     if(fromBlock && typeof fromBlock === 'number')
       await this.import(fromBlock);

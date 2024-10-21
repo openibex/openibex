@@ -13,7 +13,7 @@ export { useContractAPI, getContractAPI } from './api';
 // TODO with proper PluginStructure
 // initWallets shall be done internally in this file
 // remove export!
-export { initWallets } from './wallets'
+export { initWallets, getWallet } from './wallets'
 
 export { OiContractFactory } from './contracts';
 export { OiContractConnector, OiContractConnectorParams } from './connectors';
