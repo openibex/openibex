@@ -10,7 +10,7 @@ export abstract class OiSubscriberFactory {
    * @param filters (Topic) Filters used.
    * @returns 
    */
-  public abstract getSubscriptionId(assetArtifact: AssetArtifact, eventName: string, filters?: any[]): string;
+  public abstract getSubscriptionId(assetArtifact: AssetArtifact, eventName: string, startBlock: number | string, filters?: any[]): string;
 
   /**
    * Subscribes to a contract with the filters specified. Subscription always comes from

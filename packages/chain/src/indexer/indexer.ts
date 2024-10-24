@@ -21,10 +21,12 @@ export class OiEventIndexer{
   protected subscriptionId: string;
   protected assetArtifact: AssetArtifact;
   protected eventName: string = '*';
+  protected startBlock: number | string;
   protected bloomFilters?: any;
-  protected callback: (...args: any[]) => Promise<void>;
+  protected processorCallback!: (...args: any[]) => Promise<void>;
+  protected saveBlockCallback!: (event: string, block: number) => Promise<void>;
   
-  protected processedDB: OiNKeyValue<number>;
+  protected processedDB: OiNKeyValue<string>;
 
   protected dbPeers: Record<string, number> = {};
 
@@ -34,37 +36,70 @@ export class OiEventIndexer{
    * @param assetArtifact Asset Artifact to index
    * @param eventName event name to index
    * @param callback Callback function to call on index
+   * @param startBlock Block to start the import from.
    * @param bloomFilters Filters for import.
    */
-  public constructor(assetArtifact: AssetArtifact, eventName: string, callback:  (...args: any[]) => Promise<void> , bloomFilters?: any) {
-    this.subscriptionId = getSubscriptionId(assetArtifact, eventName, bloomFilters)
+  public constructor(assetArtifact: AssetArtifact, eventName: string, startBlock: number | string, bloomFilters?: any) {
+    this.subscriptionId = getSubscriptionId(assetArtifact, eventName, startBlock, bloomFilters)
     this.assetArtifact = assetArtifact;
     this.eventName = eventName;
+    this.startBlock = startBlock;
     this.bloomFilters = bloomFilters;
-    this.callback = callback;  }
+  }
 
-  public async startIndexer(fromBlock: number | string) {
-    
+  /**
+   * Initialize the indexer: Prepare block tracker and node detection.
+   * 
+   * @param processor Callback listening to this indexer.
+   */
+  public async init(processor: (...args: any[]) => Promise<void>, saveBlock: (event: string, block: number) => Promise<void> ) {
+    this.processorCallback = processor;
     this.processedDB = await plugin.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
 
     // Track peers that connect to this database, hence run indexers as well.
+    // FIXME @Lukas Argument of type '(peerId: any, heads: any) => Promise<void>' is not assignable to parameter of type 'never'.
+    // @ts-ignore 
     this.processedDB.events.on('join', async (peerId, heads) => {
       this.dbPeers[peerId] = Date.now();
     });
 
+    // FIXME @Lukas Argument of type '(peerId: any) => Promise<void>' is not assignable to parameter of type 'never'.
+    // @ts-ignore
     this.processedDB.events.on('leave', async (peerId) => {
       delete(this.dbPeers[peerId]);
     });
 
-    const returnValue = await this.processedDB.newest();
-    const key = (returnValue === undefined) ? 0 : returnValue.key;
+    // FIXME @Lukas
+    // This now always starts at zero - but it has done so in the past anyway, because
+    // the newest() method did not exist. Maybe you meant to use a different member variable?
+    // Property 'newest' does not exist on type 'OiNKeyValue<string>'.
+    //const returnValue = await this.processedDB.newest();
+    //const key = (returnValue === undefined) ? 0 : returnValue.key;
+
+    const key = 0;
 
     let lastBlock = key + 1
-    fromBlock = lastBlock > fromBlock ? lastBlock: fromBlock; 
+    this.startBlock = lastBlock > Number(this.startBlock) ? lastBlock: this.startBlock; 
+  }
 
-    if(fromBlock && typeof fromBlock === 'number')
-      await this.import(fromBlock);
-    else if (fromBlock !== 'latest')
+  /**
+   * Returns the subscription Id of the indexer.
+   * 
+   * @returns SubscriptionId of the indexer
+   */
+  public getSubscriptionId() {
+    return this.subscriptionId;
+  }
+
+  /**
+   * Start the indexer
+   * 
+   * @returns 
+   */
+  public async start() {
+    if(this.startBlock && typeof this.startBlock === 'number')
+      await this.import(this.startBlock);
+    else if (this.startBlock !== 'latest')
       return;
     
     this.subscribe()
@@ -117,6 +152,7 @@ export class OiEventIndexer{
 
         if (event.blockNumber > lastBlock) {
           await this.processedDB.put(lastBlock, getNodeId() + ':' + (numEvents - 1));
+          await this.saveBlockCallback(this.eventName, lastBlock);
           lastBlock = event.blockNumber;
           numEvents = 1;
         }
@@ -125,10 +161,15 @@ export class OiEventIndexer{
   }
 
   /**
-   * Overwrite this method to process events. It is called in sequential order when events are
-   * imported.
+   * This method is used to process imported events before they're sent to callback. It ensures that
+   * all events are returned in the same data structure (on a data type level);
    * 
+   * An example is available in @openibex/ethereum where ethers returns different payloads
+   * depending wether the event comes from a historic import or a subscription.
+   *  
    * @param args - Platform specific argument set.
    */
-  protected async processEvent(...args: any[]): Promise<void> { }
+  protected async processEvent(...args: any[]): Promise<void> { 
+    await this.processorCallback(...args); 
+  }
 }

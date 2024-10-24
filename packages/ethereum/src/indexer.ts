@@ -17,8 +17,8 @@ export class EthereumEventIndexer extends OiEventIndexer{
    * @param callback Callback in indexers processEvents()
    * @param bloomFilters 
    */
-  public constructor(assetArtifact: AssetArtifact, eventName: string, callback:  (...args: any[]) => Promise<void> , bloomFilters?: any) {
-    super(assetArtifact, eventName, callback, bloomFilters);
+  public constructor(assetArtifact: AssetArtifact, eventName: string, startBlock: number | string, bloomFilters?: any) {
+    super(assetArtifact, eventName, startBlock, bloomFilters);
   }
 
   /**
@@ -83,9 +83,9 @@ export class EthereumEventIndexer extends OiEventIndexer{
     args.push(sendEvent)
 
     plugin.log.info(`Log at ${sendEvent.blockNumber}-${sendEvent.index}: Arguments ${args.join(', ')}`);
-    await this.callback(...args);
+    await super.processEvent(...args);
   }
 }
 
-addPlatformIndexer('eip155', EthereumEventIndexer);
+// addPlatformIndexer('eip155', EthereumEventIndexer);
 

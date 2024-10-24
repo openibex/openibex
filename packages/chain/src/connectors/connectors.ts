@@ -1,9 +1,8 @@
-import { isSupportedPlatform } from "../providers";
 import { AssetArtifact, getCAIPAssetType } from "../resolver";
 import { OiContractConnector, OiContractConnectorParams } from "./connector";
 
 const connectorRegister: { [namespace: string]: { [connectorName: string]: typeof OiContractConnector } } = {
-  eip1155: {}
+  eip155: {}
 };
 
 /**

@@ -74,6 +74,9 @@ plugins:
             providers:
               default:
                 className: DefaultProvider
+                settings:
+                  rateLimit: 3
+                  batchSize: 5000
                 params:
                   endpoint: http://127.0.0.1:8545/
 

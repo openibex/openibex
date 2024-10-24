@@ -29,9 +29,9 @@ function checkSubscriberFactory(chainId: ChainId) {
    * @param filters (Topic) Filters used.
    * @returns 
    */
-export function getSubscriptionId(assetArtifact: AssetArtifact, eventName: string = '*', filters?: any[]) {
+export function getSubscriptionId(assetArtifact: AssetArtifact, eventName: string = '*', startBlock: number | string, filters?: any[]) {
   checkSubscriberFactory(assetArtifact.chainId);
-  return subscriberFactories[assetArtifact.chainId.namespace].getSubscriptionId(assetArtifact, eventName, filters);
+  return subscriberFactories[assetArtifact.chainId.namespace].getSubscriptionId(assetArtifact, eventName, startBlock, filters);
 }
 
 /**
@@ -51,7 +51,7 @@ export async function subscribeContract(
   isSupportedPlatform(assetArtifact);
   checkSubscriberFactory(assetArtifact.chainId);
 
-  return await subscribeContract[assetArtifact.chainId.namespace].subscrContract(assetArtifact, eventName, callback, filters);
+  return await subscriberFactories[assetArtifact.chainId.namespace].subscribeContract(assetArtifact, eventName, callback, filters);
 }
 
 /**

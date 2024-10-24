@@ -33,6 +33,25 @@ export function isSupportedPlatform(chainArtifact: ChainArtifact) {
         }
 }
 
+
+/**
+ * Determines wether a chain is supported. Returns false if not.
+ * 
+ * @param chainArtifact 
+ * @returns 
+ */
+export function isSupportedChain(chainArtifact: ChainArtifact) {
+    const chain = getCAIPChain(chainArtifact);
+    try {
+        isSupportedPlatform(chainArtifact);
+        if (getChainName(chainArtifact)) {
+            return true;
+        }
+    } catch {
+        return false;
+    }
+}
+
 /**
  * Configures providers based on a CAIP object.
  * 

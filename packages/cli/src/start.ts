@@ -15,7 +15,8 @@ export async function startOpenIbex(config: OiConfig, argv: any) {
 
   if (argv.connect) {
     const chain = await getOiChain();
-    chain.connect(new AssetType(argv.connect));
+    const connector = await chain.connect(new AssetType(argv.connect));
+    connector.start();
   }
 
   core.log.info('Entering Endless loop to run worker. stop with ctrl-C');

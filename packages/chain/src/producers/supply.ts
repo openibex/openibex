@@ -1,7 +1,6 @@
 import { OiNKeyValue } from "@openibex/core";
 import { AssetArtifact, tagCaipArtifact } from "../resolver";
 import { pluginName, pluginNamespace } from "../plugin";
-import { EventLog } from "ethers";
 import { OiChainLogProducer } from "./chainlog";
 import { plugin } from "../plugin";
 import { getBurnAddress, getMintAddress } from "../utils";
@@ -16,9 +15,9 @@ import { getBurnAddress, getMintAddress } from "../utils";
  * - any: Patricia tree of burners in the chain at that block.
  * - number: supply at the current block.
  */
-export type StateOfSupply = [number, any, any, number, any, any, number];
+export type TokenSupplyRecord = [number, any, any, number, any, any, number];
 
-export class OiChainTokenSupply extends OiChainLogProducer {
+export class OiChainTokenSupplyProducer extends OiChainLogProducer {
 
   private burnAddrTag: string = '';
   private mintAddrTag: string = '';
@@ -37,15 +36,25 @@ export class OiChainTokenSupply extends OiChainLogProducer {
 
   private supplyAmount: bigint = 0n;
 
-  constructor(assetArtifact: AssetArtifact, namespace = pluginNamespace, plugin = pluginName) {
-    super(assetArtifact, 'supply', namespace, plugin);
+  /**
+   * Creates new producer. AssetArtifact, startBlock and bloomFilter are used to
+   * generate a DB-ID 
+   * 
+   * @param assetArtifact Asset Artifact we're producing from.
+   * @param startBlock Startblock
+   * @param bloomFilter Bloom Filter
+   * @param namespace Plugin namespace
+   * @param plugin Plugin name
+   */
+  constructor(assetArtifact: AssetArtifact, tag: string, namespace = pluginNamespace, plugin = pluginName) {
+    super(assetArtifact, `supply-${tag}`, namespace, plugin);
   }
 
   public async init() {
     this.burnAddrTag = tagCaipArtifact(getBurnAddress(this.assetArtifact)) as string;
     this.mintAddrTag = tagCaipArtifact(getMintAddress(this.assetArtifact)) as string;
 
-    this.supplyDb = await plugin.getDB(1, 'oinkeyvalue', 'supply', this.assetArtifactTag) as OiNKeyValue<StateOfSupply>; 
+    this.supplyDb = await plugin.getDB(1, 'oinkeyvalue', 'supply', this.assetArtifactTag) as OiNKeyValue<TokenSupplyRecord>; 
   }
 
   /**
@@ -53,7 +62,7 @@ export class OiChainTokenSupply extends OiChainLogProducer {
    * 
    * @param params 
    */
-  public async add(params: {block: number, caipTagFrom: string, caipTagTo: string, amount: bigint, event: EventLog}) {
+  public async add(params: {block: number, caipTagFrom: string, caipTagTo: string, amount: bigint, event: any}) {
     const { block, caipTagFrom, caipTagTo, amount, event: EventLog } = params;
     
     // Some ERC20 use 0xff for minting as well and vice versa.

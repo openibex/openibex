@@ -19,8 +19,8 @@ export class EthereumSubscriberFactory extends OiSubscriberFactory {
    * @param filters (Topic) Filters used.
    * @returns 
    */
-  public getSubscriptionId(assetArtifact: AssetArtifact, eventName: string = '*', filters?: any[]) {
-    return id(`${assetArtifact.toString()}.${eventName}.${filters ? JSON.stringify(filters): ''}`);
+  public getSubscriptionId(assetArtifact: AssetArtifact, eventName: string = '*', startBlock: number | string,  filters?: any[]) {
+    return id(`${assetArtifact.toString()}.${eventName}.${startBlock}.${filters ? JSON.stringify(filters): ''}`);
   }
 
   /**
@@ -37,7 +37,7 @@ export class EthereumSubscriberFactory extends OiSubscriberFactory {
     callback: (...args: any[]) => void,
     filters?: any[]
   ) {
-    const subscrId = this.getSubscriptionId(assetArtifact, eventName, filters);
+    const subscrId = this.getSubscriptionId(assetArtifact, eventName, 'latest', filters);
 
     const chain = getCAIPChain(assetArtifact);
     plugin.log.info(`Subscribing to event ${eventName} contract ${assetArtifact.toString()}`);
