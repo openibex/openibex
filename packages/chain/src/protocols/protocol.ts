@@ -24,9 +24,14 @@ export class OiChainProtocol {
   public assetArtifacts!: AssetArtifactWithBlock[];
 
   /**
-   * Event names this protocol processes. Overwrite.
+   * Consumer / producer names this protocol processes. Overwrite.
    */
-  public eventNames!: string[];
+  public static datasetNames: string[] = [];
+
+  /**
+   * Bloom filters to apply on this protocol instance
+   */
+  public bloomFilter!: string[][];
 
   /**
    * Consumers, sorted by contract event.
@@ -39,7 +44,7 @@ export class OiChainProtocol {
     * @param customAssetArtifacts List of AssetArtifacts to connect to.
     * @param params Scraper config
     */
-  public constructor(bloomFilters?: any, customAssetArtifacts?: AssetArtifactWithBlock[]) {
+  public constructor(bloomFilter?: string[][], customAssetArtifacts?: AssetArtifactWithBlock[]) {
     if(customAssetArtifacts) {
       this.assetArtifacts = customAssetArtifacts;
     }
@@ -48,6 +53,15 @@ export class OiChainProtocol {
     if(!this.assetArtifacts) {
       throw(`Error: Protocol has no predefined or dynamically defined assets.`);
     }
+
+    this.bloomFilter = bloomFilter;
+  }
+
+  /**
+   * Initialize protocol
+   */
+  public init() {
+
   }
 
   /**
@@ -63,7 +77,7 @@ export class OiChainProtocol {
    * Initializes the scraper for this protocol. Scrapers can have bloom filters.
    */
   public async getScraper() {
-    return new OiChainScraper();
+    return new OiChainScraper(this.assetArtifacts);
   }
 
   /**
