@@ -3,6 +3,8 @@ import { getChainProvider } from "./providers";
 import { getContractConnector } from "./connectors";
 import { getContractAPI } from "./api";
 import { OiContractConnectorParams } from "./connectors/connector";
+import { AssetArtifactWithBlock } from "./protocols";
+import { getProtocolForArtifact } from "./protocols/protocols";
 
 /**
  * OiChain provides access to all chain resources (scrapers, protocols, APIs, accounts, blocks and transactions)
@@ -17,10 +19,10 @@ export class OiChain {
    * 
    * @param assetArtifact Any chain artifact.
    */
-  public async connect(assetArtifact: AssetArtifact, params: OiContractConnectorParams = {}) {
-    const connector = await getContractConnector(assetArtifact, params);
-    await connector.init();
-    return connector;
+  public async connect(assetArtifact: AssetArtifact, startBlock: number, bloomFilter?: any) {
+    const protocol = await getProtocolForArtifact(assetArtifact, startBlock, bloomFilter);
+    await protocol.init();
+    return protocol;
   }
 
   /**
@@ -42,5 +44,9 @@ export class OiChain {
    */
   public async getProvider(chainArtifact: ChainArtifact, providerType: string = 'default') {
     return await getChainProvider(chainArtifact, providerType)
+  }
+
+  public async getProtocol(name: string, bloomFilter?: any, customAssetArtifacts?: AssetArtifact[] | AssetArtifactWithBlock[]) {
+    return this.getProtocol(name, bloomFilter, customAssetArtifacts);
   }
 }

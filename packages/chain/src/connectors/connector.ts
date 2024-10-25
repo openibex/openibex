@@ -22,10 +22,10 @@ export class OiContractConnector {
   protected currentBlock: Record<string, number> = {};
   protected bloomFilter: string[][];
 
-  protected indexers!: Record<string, OiEventIndexer>;
-  protected producers!: Record<string, OiChainLogProducer[]>;
-  protected eventProcessors!: Record<string, (...args: unknown[]) => Promise<unknown[]>>;
-  protected eventPostProcessors!: Record<string, (...args: unknown[]) => Promise<unknown[]>>;
+  protected indexers: Record<string, OiEventIndexer> = {};
+  protected producers: Record<string, OiChainLogProducer[]> = {};
+  protected eventProcessors: Record<string, (...args: unknown[]) => Promise<unknown[]>> = {};
+  protected eventPostProcessors: Record<string, (...args: unknown[]) => Promise<unknown[]>> = {};
 
   protected resolver: boolean;
 
@@ -115,7 +115,7 @@ export class OiContractConnector {
    * @param callback 
    */
   public addEventPostProcessor(event: string, callback: (...args: unknown[]) => Promise<any>) {
-    if (this.eventPostProcessors[event]) {
+    if (event in this.eventPostProcessors) {
       throw Error(`An event post processor is already registered for ${event} on ${this.assetArtifact}.`);
     }
     this.eventPostProcessors[event] = callback;

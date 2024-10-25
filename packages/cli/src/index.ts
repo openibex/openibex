@@ -13,7 +13,6 @@ import { executeArgs, executeContractFunction } from './execute';
 
 import '@openibex/chain';
 import '@openibex/ethereum';
-import '@openibex/ethereum';
 
 /**
  * Load the configuration from an yaml-file.

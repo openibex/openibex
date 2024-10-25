@@ -5,9 +5,9 @@ export class OiTokenProtocol extends OiChainProtocol {
 
   public datasetNames: string[] = ['supply'];
 
-  public init() {
+  public async init() {
 
   }
 }
 
-useProtocol('token', OiTokenProtocol);
+useProtocol('token', {eip155: 'erc20', solana: 'token', hedera: 'token'}, OiTokenProtocol);
