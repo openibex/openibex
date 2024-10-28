@@ -29,9 +29,13 @@ function checkSubscriberFactory(chainId: ChainId) {
    * @param filters (Topic) Filters used.
    * @returns 
    */
-export function getSubscriptionId(assetArtifact: AssetArtifact, eventName: string = '*', startBlock: number | string, filters?: any[]) {
+export function getSubscriptionId(assetArtifact: AssetArtifact, eventName: string = '*', filters?: string[][]) {
   checkSubscriberFactory(assetArtifact.chainId);
-  return subscriberFactories[assetArtifact.chainId.namespace].getSubscriptionId(assetArtifact, eventName, startBlock, filters);
+  
+  // Ensure filters is defined and process each entry to return a string
+  const processedFilters = filters?.map(value => value.join('.')).join('.') || '';
+
+  return subscriberFactories[assetArtifact.chainId.namespace].getSubscriptionId(assetArtifact, eventName, processedFilters);
 }
 
 /**

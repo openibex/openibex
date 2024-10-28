@@ -20,7 +20,6 @@ export function useProtocol(name: string, handles: Record<string, string>, proto
     if (!protocolHandles[namespace]) {
       protocolHandles[namespace] = {};
     }
-    console.log(`namespace: ${namespace}, handle: ${handleName}, name: ${name}`);
     protocolHandles[namespace][handleName] = name;
   }
 }

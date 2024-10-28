@@ -8,6 +8,7 @@ export type OiNKeyValue<T = OiDbElements | OiDbArrays | OiDbObjects> = Database 
   del: (key: number) => Promise<any>;
   get: (key: number) => Promise<T | null>;
   has: (key: number) => Promise<boolean>;
+  newest: () => Promise<{key: number, value: T}>;
   all: () => Promise<{ key: number; value: T; hash: string }[]>;
   iterator: (filters?: {
     amount?: string;
@@ -142,21 +143,18 @@ export const OiNKeyValueDatabase = () => async ({
    */
   const newest = async (): Promise<{
     key: number,
-    value: unknown,
-    hash: string,
+    value: unknown
   }| void> => {
     
     let retval: {
       key: number
       value: unknown;
-      hash: string;
     } | undefined = undefined;
 
     for await (const entry of iterator({amount: 1})){
       retval = {
         key: entry.key,
-        value: entry.value,
-        hash: entry.hash
+        value: entry.value
       }
     }
 

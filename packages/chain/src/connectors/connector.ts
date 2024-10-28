@@ -49,23 +49,23 @@ export class OiContractConnector {
         throw Error(`No indexer set for event ${event} on ${this.assetArtifact}`);
       }
 
-      this.indexers[event].start();
+      await this.indexers[event].start();
     }
   }
 
   /**
-   * Init method, intended to be overwritten in your subclass.
+   * Connector initializations. Initializes the producers and the indexer.
    */
   public async init() {
-    for (const event of Object.keys(this.indexers)) {
-      this.indexers[event].init(async (...args: unknown[]): Promise<void> => {
-        const record = await this.eventProcessors[event](args);
-        this.addLog(event, record);
-      }, this.saveBlock);
+    const addLog = this.addLog.bind(this);
+    const saveBlock = this.saveBlock.bind(this);
 
+    for (const event of Object.keys(this.indexers)) {
       this.producers[event].forEach(async producer => {
         await producer.init();
       });
+      
+      await this.indexers[event].init(addLog, saveBlock);
     }
   }
 
@@ -122,20 +122,22 @@ export class OiContractConnector {
   }
 
   /**
-   * Add an event to all producers.
+   * Saves an event log to all producers.
    * 
-   * @param event Event the log is for.
-   * @param params Log Params
-   * @returns 
+   * @param event Event name
+   * @param args Log topics and raw event object as last argument.
    */
-  protected async addLog(event: string, params: any) {
-    if (! this.producers[event]) {
-      return;
+  public async addLog(event: string, ...args: unknown[]) {
+    const record = await this.eventProcessors[event](...args);
+
+    if (this.producers[event]) {
+      await Promise.all(this.producers[event].map(async producer => {
+        await producer.add(record);
+      }));
     }
-    
-    await Promise.all(this.producers[event].map(async producer => {
-      await producer.add(params);
-    }));
+    if(this.eventPostProcessors[event]) {
+      await this.eventPostProcessors[event](this.assetArtifact, event, record);
+    }
   }
 
   /**
@@ -145,7 +147,7 @@ export class OiContractConnector {
    * @param blockNumber Block number that reached indexer finality.
    * @returns 
    */
-  protected async saveBlock(event: string, blockNumber: number){
+  public async saveBlock(event: string, blockNumber: number){
     if(!this.currentBlock[event]) {
       this.currentBlock[event] = blockNumber;
     } else if (this.currentBlock[event] < blockNumber) {

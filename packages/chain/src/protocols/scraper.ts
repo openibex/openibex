@@ -1,4 +1,5 @@
 import { getContractConnector, OiContractConnector } from "../connectors";
+import { plugin } from "../plugin";
 import { isSupportedChain } from "../providers";
 import { AssetArtifactWithBlock } from "./protocol";
 
@@ -30,6 +31,7 @@ export class OiChainScraper {
 
     for( const artifact of assetArtifacts) {
       if (!isSupportedChain(artifact.assetArtifact)) {
+        plugin.log.warn(`Cant scrape ${artifact.assetArtifact.toString()} - Chain or platform not supported.`);
         continue;
       }
 
@@ -41,9 +43,9 @@ export class OiChainScraper {
    * Init and start the scraper by initializing all the connectors.
    */
   public async init() {
-    this.assetArtifacts.map(async (artifact: AssetArtifactWithBlock) => {
+    await Promise.all(this.assetArtifacts.map(async (artifact: AssetArtifactWithBlock) => {
       this.connectors.push(await getContractConnector(artifact.assetArtifact, {startBlock: artifact.startBlock}));
-    });
+    }));
 
     await Promise.all(this.connectors.map(async connector => {
       await connector.init();

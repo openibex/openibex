@@ -23,10 +23,10 @@ export class OiEventIndexer{
   protected eventName: string = '*';
   protected startBlock: number | string;
   protected bloomFilters?: any;
-  protected processorCallback!: (...args: any[]) => Promise<void>;
-  protected saveBlockCallback!: (event: string, block: number) => Promise<void>;
+  protected processorCallback!: (event: string, ...args: any[]) => Promise<void>;
+  protected onBlockCompleteCallback!: (event: string, block: number) => Promise<void>;
   
-  protected processedDB: OiNKeyValue<string>;
+  protected processedDB!: OiNKeyValue<string>;
 
   protected dbPeers: Record<string, number> = {};
 
@@ -40,7 +40,7 @@ export class OiEventIndexer{
    * @param bloomFilters Filters for import.
    */
   public constructor(assetArtifact: AssetArtifact, eventName: string, startBlock: number | string, bloomFilters?: any) {
-    this.subscriptionId = getSubscriptionId(assetArtifact, eventName, startBlock, bloomFilters)
+    this.subscriptionId = getSubscriptionId(assetArtifact, eventName, bloomFilters)
     this.assetArtifact = assetArtifact;
     this.eventName = eventName;
     this.startBlock = startBlock;
@@ -51,9 +51,11 @@ export class OiEventIndexer{
    * Initialize the indexer: Prepare block tracker and node detection.
    * 
    * @param processor Callback listening to this indexer.
+   * @param onBlockComplete Callback listening to this indexer.
    */
-  public async init(processor: (...args: any[]) => Promise<void>, saveBlock: (event: string, block: number) => Promise<void> ) {
+  public async init(processor: (...args: any[]) => Promise<void>, onBlockComplete: (event: string, block: number) => Promise<void> ) {
     this.processorCallback = processor;
+    this.onBlockCompleteCallback = onBlockComplete;
     this.processedDB = await plugin.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
 
     // Track peers that connect to this database, hence run indexers as well.
@@ -69,14 +71,8 @@ export class OiEventIndexer{
       delete(this.dbPeers[peerId]);
     });
 
-    // FIXME @Lukas
-    // This now always starts at zero - but it has done so in the past anyway, because
-    // the newest() method did not exist. Maybe you meant to use a different member variable?
-    // Property 'newest' does not exist on type 'OiNKeyValue<string>'.
-    //const returnValue = await this.processedDB.newest();
-    //const key = (returnValue === undefined) ? 0 : returnValue.key;
-
-    const key = 0;
+    const returnValue = await this.processedDB.newest();
+    const key = (returnValue === undefined) ? 0 : returnValue.key;
 
     let lastBlock = key + 1
     this.startBlock = lastBlock > Number(this.startBlock) ? lastBlock: this.startBlock; 
@@ -152,7 +148,7 @@ export class OiEventIndexer{
 
         if (event.blockNumber > lastBlock) {
           await this.processedDB.put(lastBlock, getNodeId() + ':' + (numEvents - 1));
-          await this.saveBlockCallback(this.eventName, lastBlock);
+          await this.onBlockCompleteCallback(this.eventName, lastBlock);
           lastBlock = event.blockNumber;
           numEvents = 1;
         }
@@ -170,6 +166,6 @@ export class OiEventIndexer{
    * @param args - Platform specific argument set.
    */
   protected async processEvent(...args: any[]): Promise<void> { 
-    await this.processorCallback(...args); 
+    await this.processorCallback(this.eventName, ...args); 
   }
 }

@@ -18,7 +18,7 @@ export async function startOpenIbex(config: OiConfig, argv: any) {
     const protocol = await chain.connect(new AssetType(argv.connect), 6082465);
     const scraper = await protocol.getScraper();
     await scraper.init();
-    await scraper.start()
+    await scraper.start();
   }
 
   core.log.info('Entering Endless loop to run worker. stop with ctrl-C');

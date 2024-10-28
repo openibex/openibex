@@ -1,5 +1,5 @@
 import { ERC20abi } from "./abi";
-import { AssetArtifact, lookupCaipTag, useABI, useContractConnector,  OiChainTokenSupplyProducer, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
+import { AssetArtifact, useABI, useContractConnector,  OiChainTokenSupplyProducer, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
 import { plugin } from "../plugin";
 import { AccountId } from "caip";
 import { EventLog } from "ethers";
@@ -12,7 +12,7 @@ import { EthereumEventIndexer } from "../indexer";
  * - Holders: All holders in that block and on-chain as trie. As well a holders table that represents latest status.
  *
  */
-export class OiErc20 extends OiContractConnector {
+export class OiErc20Connector extends OiContractConnector {
 
   /**
    * Constructor.
@@ -20,9 +20,11 @@ export class OiErc20 extends OiContractConnector {
    * @param assetArtifact AssetArtifact, has to be 'erc20' denominated.
    * @param params 
    */
-  constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams) {
-    super(assetArtifact, params);
-    super.addIndexer('Transfer', new EthereumEventIndexer(assetArtifact, 'Transfer', this.startBlock, this.bloomFilter ))
+  constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams, bloomFilter?: string[][]) {
+    super(assetArtifact, params, bloomFilter);
+    
+    super.addIndexer('Transfer', new EthereumEventIndexer(assetArtifact, 'Transfer', this.startBlock, this.bloomFilter ));
+    super.addEventProcessor('Transfer', this.processTransfer.bind(this));
     super.addProducer('Transfer', new OiChainTokenSupplyProducer(assetArtifact, this.indexers['Transfer'].getSubscriptionId()));
   }
 
@@ -38,5 +40,5 @@ export class OiErc20 extends OiContractConnector {
   }
 }
 
-await useContractConnector('erc20', OiErc20, 'eip155');
+await useContractConnector('erc20', OiErc20Connector, 'eip155');
 await useABI('eip155', 'erc20', ERC20abi);
