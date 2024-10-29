@@ -4,7 +4,7 @@ import { getContractConnector } from "./connectors";
 import { getContractAPI } from "./api";
 import { OiContractConnectorParams } from "./connectors/connector";
 import { AssetArtifactWithBlock } from "./protocols";
-import { getProtocolForArtifact } from "./protocols/protocols";
+import { getProtocolForArtifact, getProtocol } from "./protocols";
 
 /**
  * OiChain provides access to all chain resources (scrapers, protocols, APIs, accounts, blocks and transactions)
@@ -47,6 +47,19 @@ export class OiChain {
   }
 
   public async getProtocol(name: string, bloomFilter?: any, customAssetArtifacts?: AssetArtifact[] | AssetArtifactWithBlock[]) {
-    return this.getProtocol(name, bloomFilter, customAssetArtifacts);
+    if(customAssetArtifacts) {
+      let assetArtifacts: AssetArtifactWithBlock[];
+
+      customAssetArtifacts.map((assetArtifact) => {
+        if ('startBlock' in assetArtifact)
+          assetArtifacts.push(assetArtifact);
+        else
+         assetArtifacts.push({assetArtifact, startBlock: 0})
+      })
+
+      return getProtocol(name, bloomFilter, assetArtifacts);
+    }
+
+    return getProtocol(name, bloomFilter);
   }
 }

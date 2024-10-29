@@ -94,6 +94,14 @@ async function main() {
         describe: 'This command connects any protocol that has a connector. Example: ERC20 (USDC) on ETH eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         default: undefined,
         demandOption: false
+      }).option('block', {
+        describe: 'This is an addon to connect. It allows to specify the startblock. Example: USDC on ETH 6082465',
+        default: undefined,
+        demandOption: false
+      }).option('scrape', {
+        describe: 'This command connects any protocol that has a connector. Example: USDC (on every supported chain) \'usd-circle\'',
+        default: undefined,
+        demandOption: false
       });
     },
     async (argv) => {

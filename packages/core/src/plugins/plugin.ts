@@ -36,6 +36,8 @@ export class OiPlugin {
   public log!: OiLoggerInterface;
   private coreDB!: KeyValue<OiCoreSchema>;
   private valuesDB!: KeyValue<any>;
+
+  private dbLocks: Set<string> = new Set<string>();
   
   /**
    * After constructor the Plugin will not be initialized but is ready to run init()
@@ -129,12 +131,19 @@ export class OiPlugin {
    */
   public async getDB(revision: number, type: string, name: string, tag?: string): Promise<any> {
     if (!this.coreDB) throw Error('Database coreDB not initialized. Run OiCore.init() first.');
+    this.log.info(`Opening DB for ${this.pluginName}, ${name} with tag "${tag}" in revision ${revision}`);
 
     const dbName = `${this.pluginNamespace}.${this.pluginName}.${name}.v${revision}${tag? '.'+ tag : ''}`;
+
+    while(this.dbLocks.has(dbName)) {
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+
+    this.dbLocks.add(dbName)
+
     let dbOpts: OiCoreSchema | undefined = await this.coreDB.get(dbName);
 
     const db = await openDatabase(dbOpts ? dbOpts.address : dbName, dbOpts ? dbOpts.type: type);
-
     this.log.info(`Opened DB ${dbName} at address ${db.address}`);
 
     if(!dbOpts) {
@@ -147,6 +156,7 @@ export class OiPlugin {
       await this.coreDB.put(dbName, dbOpts)
     }
     
+    this.dbLocks.delete(dbName);
     return db;
   }
 }

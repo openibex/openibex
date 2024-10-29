@@ -25,14 +25,18 @@ export async function useContractConnector(name: string, connector: typeof OiCon
  * @param assetArtifact 
  * @returns 
  */
-export async function getContractConnector(assetArtifact: AssetArtifact, params: OiContractConnectorParams): Promise<OiContractConnector> {
+export async function getContractConnector(assetArtifact: AssetArtifact, params: OiContractConnectorParams, connectorName?: string): Promise<OiContractConnector> {
   const assetType = getCAIPAssetType(assetArtifact);
   const namespace = assetType.chainId.namespace;
 
-  const connector = connectorRegister[namespace][assetType.assetName.namespace];
+  if (!connectorName) {
+    connectorName = assetType.assetName.namespace
+  }
+
+  const connector = connectorRegister[namespace][connectorName];
   
   if (!connector) {
-    throw new Error(`Connector not found for name: ${assetType.assetName.reference} in namespace: ${namespace}`);
+    throw new Error(`Connector not found for name: ${connectorName} in namespace: ${namespace}`);
   }
   
   return new connector(assetArtifact, params);

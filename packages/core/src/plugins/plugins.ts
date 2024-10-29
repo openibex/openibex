@@ -4,9 +4,7 @@ import { OiPlugin } from "./plugin";
 
 const plugins: string[] = [];
 
-const pluginRegister: { [namespace: string]: { [pluginName: string]: OiPlugin } } = {
-  eip155: {}
-};
+const pluginRegister: { [namespace: string]: { [pluginName: string]: OiPlugin } } = {};
 
 /**
  * Register a plugin.

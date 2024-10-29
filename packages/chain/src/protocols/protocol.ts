@@ -7,6 +7,8 @@ export type AssetArtifactWithBlock = {
   assetArtifact: AssetArtifact, startBlock: number
 }
 
+export type ProtocolMap = Record<string, Record<string, string>>;
+
 /**
  * A protocol (i.e. in DeFi) is a set of smart contracts offering a set of functions.
  * In OpenIbex protocols are represented by data collections which are built using scrapers.
@@ -21,12 +23,17 @@ export class OiChainProtocol {
    * Asset artifacts your protocol contains, and their startblocks.
    * Overwrite this in the inherited class.
    */
-  public assetArtifacts!: AssetArtifactWithBlock[];
+  public assetArtifacts: AssetArtifactWithBlock[] = [];
+
+  /**
+   * Mapping your protocol: Which standard implements functionality on each platform.
+   */
+  public protocolMap: ProtocolMap;
 
   /**
    * Consumer / producer names this protocol processes. Overwrite.
    */
-  public static datasetNames: string[] = [];
+  public datasetNames: string[] = [];
 
   /**
    * Bloom filters to apply on this protocol instance
@@ -39,11 +46,11 @@ export class OiChainProtocol {
   protected consumers: Record<string, OiDataConsumer[]> = {};
 
   /**
-    * Creates a new protocol instance. 
-    * 
-    * @param customAssetArtifacts List of AssetArtifacts to connect to.
-    * @param params Scraper config
-    */
+   * Protocol constructor. Can overwrite the protocolMap and AssetArtifacts.
+   * 
+   * @param bloomFilter - BloomFilters for this instance.
+   * @param customAssetArtifacts - I.e. when running on Testnet
+   */
   public constructor(bloomFilter?: string[][], customAssetArtifacts?: AssetArtifactWithBlock[]) {
     if(customAssetArtifacts) {
       this.assetArtifacts = customAssetArtifacts;
@@ -77,7 +84,7 @@ export class OiChainProtocol {
    * Initializes the scraper for this protocol. Scrapers can have bloom filters.
    */
   public async getScraper() {
-    return new OiChainScraper(this.assetArtifacts);
+    return new OiChainScraper(this.assetArtifacts, this.protocolMap);
   }
 
   /**

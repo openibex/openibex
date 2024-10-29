@@ -1,7 +1,7 @@
 import { getContractConnector, OiContractConnector } from "../connectors";
 import { plugin } from "../plugin";
 import { isSupportedChain } from "../providers";
-import { AssetArtifactWithBlock } from "./protocol";
+import { AssetArtifactWithBlock, ProtocolMap } from "./protocol";
 
 /**
  * A scraper collects all data required for a protocol to operate. It orchestrates
@@ -17,18 +17,15 @@ export class OiChainScraper {
   protected assetArtifacts: AssetArtifactWithBlock[] = [];
   protected connectors: OiContractConnector[] = [];
 
+  private protocolMap: ProtocolMap;
+
   /**
    * Creates a new scraper instance.
    * 
    * @param assetArtifacts List of AssetArtifacts to connect to.
    * @param params Scraper config
    */
-  public constructor(assetArtifacts?: AssetArtifactWithBlock[], params?: any) {
-    if(!assetArtifacts) {
-      assetArtifacts = this.assetArtifacts;
-      this.assetArtifacts = [];
-    }
-
+  public constructor(assetArtifacts: AssetArtifactWithBlock[], protocolMap: ProtocolMap, params?: any) {
     for( const artifact of assetArtifacts) {
       if (!isSupportedChain(artifact.assetArtifact)) {
         plugin.log.warn(`Cant scrape ${artifact.assetArtifact.toString()} - Chain or platform not supported.`);
@@ -37,6 +34,8 @@ export class OiChainScraper {
 
       this.assetArtifacts.push(artifact);
     }
+
+    this.protocolMap = protocolMap;
   }
 
   /**
@@ -44,7 +43,16 @@ export class OiChainScraper {
    */
   public async init() {
     await Promise.all(this.assetArtifacts.map(async (artifact: AssetArtifactWithBlock) => {
-      this.connectors.push(await getContractConnector(artifact.assetArtifact, {startBlock: artifact.startBlock}));
+      const namespace = artifact.assetArtifact.chainId.namespace;
+
+      for(const setName in this.protocolMap) {
+        if(!this.protocolMap[setName][namespace]) {
+          plugin.log.warn(`Protocol does not support ${setName} on ${namespace}.`);
+          continue;
+        }
+        const connectorName = this.protocolMap[setName][namespace];
+        this.connectors.push(await getContractConnector(artifact.assetArtifact, {startBlock: artifact.startBlock}, connectorName));
+      } 
     }));
 
     await Promise.all(this.connectors.map(async connector => {

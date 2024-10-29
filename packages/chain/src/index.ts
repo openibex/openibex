@@ -21,7 +21,8 @@ export { OiChainTokenSupplyProducer } from './producers/supply';
 export { OiProviderFactory, OiProvidersList } from './providers';
 export { OiEventIndexer } from './indexer';
 export { OiSubscriberFactory } from './subscriber';
-export { OiChainProtocol, OiTokenProtocol } from './protocols';
+export { OiChainProtocol, useProtocol } from './protocols';
+export { OiTokenProtocol } from './token';
 export { OiApi } from './api';
 
 // Users use OiChain to access the blockchain.
