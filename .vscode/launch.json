@@ -7,6 +7,20 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Initialize",
+      "runtimeExecutable": "npx",
+      "args": [
+        "tsx",
+        "packages/cli/src/index.ts",
+        "init"
+      ],
+      "cwd": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "USDC Connect with startblock",
       "runtimeExecutable": "npx",
       "args": [

@@ -2,9 +2,7 @@ import { OiLoggerInterface } from "../core";
 import { OiConfig } from "../core.config";
 import { OiPlugin } from "./plugin";
 
-const plugins: string[] = [];
-
-const pluginRegister: { [namespace: string]: { [pluginName: string]: OiPlugin } } = {};
+const pluginRegister: { [namespace: string]: { [pluginName: string]: { plugin: OiPlugin, dependencies: string[]}} } = {};
 
 /**
  * Register a plugin.
@@ -13,12 +11,12 @@ const pluginRegister: { [namespace: string]: { [pluginName: string]: OiPlugin } 
  * @param namespace Module namespace. If none is given, the configured db namespace is used.
  * @returns Module configuration
  */
-export function registerOiPlugin(pluginName: string, namespace: string, plugin: OiPlugin)  {
+export function registerOiPlugin(pluginName: string, namespace: string, plugin: OiPlugin, dependencies?: string[])  {
   if (!pluginRegister[namespace]) {
     pluginRegister[namespace] = {};
   }
 
-  pluginRegister[namespace][pluginName] = plugin;
+  pluginRegister[namespace][pluginName] = {plugin, dependencies};
 }
 
 /**
@@ -27,21 +25,27 @@ export function registerOiPlugin(pluginName: string, namespace: string, plugin: 
  * @param config App configurations with plugins section.
  * @param logger 
  */
-export async function initPlugins(config: OiConfig, coreDB: any, logger: OiLoggerInterface){
-  const promises: Promise<void>[] = [];
-  const pluginConfigs = config.plugins;
+export async function initPlugins(config: OiConfig, coreDB: any, logger: OiLoggerInterface) {
+  const initializedPlugins = new Set<string>();
 
-  for (let namespace in pluginRegister) {
-    for (let plugin in pluginRegister[namespace]) {
-      let pluginConf = {}
-      if (namespace in pluginConfigs ) {
-        if (plugin in pluginConfigs[namespace]) {
-          pluginConf = pluginConfigs[namespace][plugin];
-        }
-      }
-      promises.push(pluginRegister[namespace][plugin].init(config.database.namespace, pluginConf, coreDB, logger));
+  const initializePlugin = async (namespace: string, pluginName: string, pluginConf: any) => {
+    const pluginKey = `${namespace}.${pluginName}`;
+    if (initializedPlugins.has(pluginKey)) return; // Skip if already initialized
+
+    const pluginEntry = pluginRegister[namespace][pluginName];
+    for (const dependency of pluginEntry.dependencies || []) {
+      const [depNamespace, depName] = dependency.split(".");
+      await initializePlugin(depNamespace, depName, config.plugins[depNamespace]?.[depName] || {});
     }
 
-    await Promise.all(promises);
+    await pluginEntry.plugin.init(config.database.namespace, pluginConf.config, coreDB, logger);
+    initializedPlugins.add(pluginKey);
+  };
+
+  for (let namespace in pluginRegister) {
+    for (let pluginName in pluginRegister[namespace]) {
+      const pluginConf = config.plugins[namespace]?.[pluginName] || {};
+      await pluginRegister[namespace][pluginName].plugin.init(config.database.namespace, pluginConf, coreDB, logger);
+    }
   }
 }

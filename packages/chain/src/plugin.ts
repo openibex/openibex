@@ -48,4 +48,4 @@ plugin.onInit('chain', async (name: string, config: any, plugin: OiPlugin) : Pro
 });
 
 // Register the plugin
-registerOiPlugin(pluginName, pluginNamespace, plugin);
+registerOiPlugin(pluginName, pluginNamespace, plugin, ['openibex.core']);

@@ -33,6 +33,7 @@ export enum OiValueType {
 
 // OiCore-Singleton
 let core: OiCore | undefined = undefined;
+let coreInitLock: boolean = false;
 
 /**
  * Retrieves the core (and initializes it on first call)
@@ -51,6 +52,10 @@ let core: OiCore | undefined = undefined;
  * @returns Fully operational OiCore instance representing the app.
  */
 export async function getOiCore(config: OiConfig | undefined = undefined, logger: OiLoggerInterface | undefined = undefined): Promise<OiCore> {
+  while(coreInitLock) {
+    await new Promise(resolve => setTimeout(resolve, 25))
+  }
+  
   if(!core) {
     if(config === undefined) {
       throw Error("Core still needs to be initialized. For initialization, config and logger are required");
@@ -76,16 +81,19 @@ async function initOiCore(config: OiConfig, logger: OiLoggerInterface): Promise<
     throw Error("Core was already initialized earlier, it can only be initialized once!");
   }
   
+  coreInitLock = true;
+
   if (!config.database.address) throw Error('No DB address for coreDB in config. Please edit your config or run npx oi init');
 
   core = new OiCore(config);
 
   // the core is a plugin itself, register it
-  registerOiPlugin('core', config.database.namespace, core);
+  registerOiPlugin('core', 'openibex', core, []);
 
   const coreDB = await openDatabase(config.database.address, 'keyvalue') as unknown as KeyValue<OiCoreSchema>;
   
   await initPlugins(config, coreDB, logger);
+  coreInitLock = false;
 }
 
 class BaseLogger implements OiLoggerInterface {
@@ -128,7 +136,7 @@ export class OiCore extends OiPlugin {
    * @param logger A logger object.
    */
   constructor(config: OiConfig) {
-    super('core', config.database.namespace);
+    super('core', 'openibex');
 
     this.dbConf = config.database;
     this.heliaConf = config.helia;
