@@ -36,6 +36,6 @@ export class OiChainTokenSupplyProducer extends OiChainLogConsumer {
 
   public async init() {
     const idAsInProducer = '';
-    this.supplyDb = await plugin.getDB(1, 'oinkeyvalue', 'supply', idAsInProducer) as OiNKeyValue<TokenSupplyRecord>; 
+    this.supplyDb = await plugin.db.getDB(1, 'oinkeyvalue', 'supply', idAsInProducer) as OiNKeyValue<TokenSupplyRecord>; 
   }
 }

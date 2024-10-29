@@ -10,6 +10,9 @@ export { initOrbitDB, getOrbitDB, isDBReady, openDatabase, stopDatabase } from '
 // Generic data types for databases.
 export type { OiDbElements, OiDbSchema } from './dbtypes';
 
+// The database Manager
+export { OiDbManager } from './manager';
+
 // Databases available.
 export { OiScoredSet } from './scoredset';
 export { type OiKeyValueExtended } from './keyvalue-extended';

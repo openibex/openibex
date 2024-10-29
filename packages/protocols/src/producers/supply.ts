@@ -54,7 +54,7 @@ export class OiChainTokenSupplyProducer extends OiChainLogProducer {
     this.burnAddrTag = tagCaipArtifact(getBurnAddress(this.assetArtifact)) as string;
     this.mintAddrTag = tagCaipArtifact(getMintAddress(this.assetArtifact)) as string;
 
-    this.supplyDb = await plugin.getDB(1, 'oinkeyvalue', 'supply', this.assetArtifactTag) as OiNKeyValue<TokenSupplyRecord>; 
+    this.supplyDb = await plugin.db.getDB(1, 'oinkeyvalue', 'supply', this.assetArtifactTag) as OiNKeyValue<TokenSupplyRecord>; 
   }
 
   /**

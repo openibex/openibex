@@ -3,7 +3,7 @@ export { startNode, stopNode, getNodeId} from './node';
 export { initApp } from './init';
 export { OiPreload } from './init';
 
-export { registerOiPlugin, OiPlugin} from './plugins';
+export { registerOiPlugin, OiPlugin, OiPluginService} from './plugins';
 
 export {OiDataProducer, OiDataLogProducer, OiDataSeriesProducer, OiDataKeyValueProducer, OiDataSetProducer, OiDataStoreProducer, OiPipelineProducer } from './producers';
 export {OiDataConsumer, OiDataLogConsumer, OiDataKeyValueConsumer, OiDataSetConsumer, OiDataStoreConsumer, OiPipelineConsumer } from './consumers';

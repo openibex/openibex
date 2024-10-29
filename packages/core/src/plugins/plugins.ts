@@ -38,14 +38,18 @@ export async function initPlugins(config: OiConfig, coreDB: any, logger: OiLogge
       await initializePlugin(depNamespace, depName, config.plugins[depNamespace]?.[depName] || {});
     }
 
-    await pluginEntry.plugin.init(config.database.namespace, pluginConf.config, coreDB, logger);
+    await pluginEntry.plugin.init(pluginConf.config, coreDB, logger);
     initializedPlugins.add(pluginKey);
   };
 
   for (let namespace in pluginRegister) {
     for (let pluginName in pluginRegister[namespace]) {
       const pluginConf = config.plugins[namespace]?.[pluginName] || {};
-      await pluginRegister[namespace][pluginName].plugin.init(config.database.namespace, pluginConf, coreDB, logger);
+      await initializePlugin(namespace, pluginName, pluginConf);
     }
   }
+}
+
+export function getPlugin(namespace: string, pluginName: string) {
+  return pluginRegister[namespace][pluginName].plugin;
 }
