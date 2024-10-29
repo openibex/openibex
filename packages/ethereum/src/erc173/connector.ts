@@ -3,6 +3,7 @@ import { AssetArtifact, useABI, useContractConnector,  OiChainTokenSupplyProduce
 import { AccountId } from "caip";
 import { EventLog } from "ethers";
 import { EthereumEventIndexer } from '../indexer';
+import { OiChainLogProducer } from "@openibex/chain/src/producers";
 
 /**
  * The OiErc173Connector implements the Ownable interface and processes its events.
@@ -20,7 +21,6 @@ export class OiErc173Connector extends OiContractConnector {
 
     super.addIndexer('OwnershipTransferred', new EthereumEventIndexer(assetArtifact, 'OwnershipTransferred', this.startBlock, this.bloomFilter ))
     super.addEventProcessor('OwnershipTransferred', this.ownershipTransferred.bind(this));
-    super.addProducer('OwnershipTransferred', new OiChainTokenSupplyProducer(assetArtifact, this.indexers['OwnershipTransferred'].getSubscriptionId()));
   }
 
   public async ownershipTransferred(previousOwner: string, newOwner: string, event: EventLog): Promise<any> {

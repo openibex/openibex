@@ -61,11 +61,14 @@ export class OiContractConnector {
     const saveBlock = this.saveBlock.bind(this);
 
     for (const event of Object.keys(this.indexers)) {
+      if(!this.eventProcessors[event]) throw Error(`No event processor added for event ${event} on ${this.assetArtifact}`);
+
+      await this.indexers[event].init(addLog, saveBlock);
+      
+      if(!this.producers[event]) continue;
       this.producers[event].forEach(async producer => {
         await producer.init();
       });
-      
-      await this.indexers[event].init(addLog, saveBlock);
     }
   }
 
@@ -135,6 +138,7 @@ export class OiContractConnector {
         await producer.add(record);
       }));
     }
+
     if(this.eventPostProcessors[event]) {
       await this.eventPostProcessors[event](this.assetArtifact, event, record);
     }

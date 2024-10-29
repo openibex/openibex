@@ -50,11 +50,11 @@ export class OiEventIndexer{
   /**
    * Initialize the indexer: Prepare block tracker and node detection.
    * 
-   * @param processor Callback listening to this indexer.
+   * @param eventProcessor Callback listening to this indexer.
    * @param onBlockComplete Callback listening to this indexer.
    */
-  public async init(processor: (...args: any[]) => Promise<void>, onBlockComplete: (event: string, block: number) => Promise<void> ) {
-    this.processorCallback = processor;
+  public async init(eventProcessor: (...args: any[]) => Promise<void>, onBlockComplete: (event: string, block: number) => Promise<void> ) {
+    this.processorCallback = eventProcessor;
     this.onBlockCompleteCallback = onBlockComplete;
     this.processedDB = await plugin.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
 
