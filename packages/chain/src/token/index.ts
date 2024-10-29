@@ -1,0 +1,1 @@
+export { OiTokenProtocol } from './token';
