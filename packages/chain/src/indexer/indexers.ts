@@ -39,7 +39,7 @@ export async function indexEvents(
   const subscriptionId = getSubscriptionId(assetArtifact, eventName, bloomFilters)
   const indexer: OiEventIndexer = new platformIndexers[assetArtifact.chainId.namespace](assetArtifact, eventName, callback, startBlock, bloomFilters);
   // Indexer class will handle mutexes and failover once it's implemented.
-  await plugin.setVal(getNodeId(), 'mutex', subscriptionId);
+  // await plugin.setVal(getNodeId(), 'mutex', subscriptionId);
 
   plugin.log.info(`Starting indexer on ${assetArtifact.toString()}/${eventName} from ${startBlock}`);
   indexer.start();

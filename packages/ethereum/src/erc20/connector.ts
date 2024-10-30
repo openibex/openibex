@@ -1,5 +1,5 @@
 import { ERC20abi } from "./abi";
-import { AssetArtifact, useABI, useContractConnector,  OiChainTokenSupplyProducer, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
+import { AssetArtifact, useABI, useContractConnector, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
 import { plugin } from "../plugin";
 import { AccountId } from "caip";
 import { EventLog } from "ethers";
@@ -25,7 +25,7 @@ export class OiErc20Connector extends OiContractConnector {
     
     super.addIndexer('Transfer', new EthereumEventIndexer(assetArtifact, 'Transfer', this.startBlock, this.bloomFilter ));
     super.addEventProcessor('Transfer', this.processTransfer.bind(this));
-    super.addProducer('Transfer', new OiChainTokenSupplyProducer(assetArtifact, this.indexers['Transfer'].getSubscriptionId()));
+    // super.addProducer('Transfer', new OiChainTokenSupplyProducer(assetArtifact, this.indexers['Transfer'].getSubscriptionId()));
   }
 
   public async processTransfer(from: string, to: string, amount: bigint, event: EventLog): Promise<any> {

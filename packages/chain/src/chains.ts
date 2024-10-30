@@ -3,8 +3,6 @@ import { getChainProvider } from "./providers";
 import { getContractConnector } from "./connectors";
 import { getContractAPI } from "./api";
 import { OiContractConnectorParams } from "./connectors/connector";
-import { AssetArtifactWithBlock } from "./protocols";
-import { getProtocolForArtifact, getProtocol } from "./protocols";
 
 /**
  * OiChain provides access to all chain resources (scrapers, protocols, APIs, accounts, blocks and transactions)
@@ -14,15 +12,18 @@ import { getProtocolForArtifact, getProtocol } from "./protocols";
  * 
  */
 export class OiChain {
+  
   /**
-   * Connects to an Asset / Contract
+   * Returns a connector for an assetArtifact. The connector needs to be configured with DataSets and callbacks as needed.
    * 
-   * @param assetArtifact Any chain artifact.
+   * @param assetArtifact Any assetArtifact
+   * @param params Connector Configuration
+   * @param altConnectorName Alternative connectorName if different from ABI of assetArtifact.
+   * @returns 
    */
-  public async connect(assetArtifact: AssetArtifact, startBlock: number, bloomFilter?: any) {
-    const protocol = await getProtocolForArtifact(assetArtifact, startBlock, bloomFilter);
-    await protocol.init();
-    return protocol;
+  public async getContractConnector(assetArtifact: AssetArtifact, params: OiContractConnectorParams = {startBlock: 0}, altConnectorName?: string) {
+    const connector = await getContractConnector(assetArtifact, params);
+    return connector;
   }
 
   /**
@@ -44,22 +45,5 @@ export class OiChain {
    */
   public async getProvider(chainArtifact: ChainArtifact, providerType: string = 'default') {
     return await getChainProvider(chainArtifact, providerType)
-  }
-
-  public async getProtocol(name: string, bloomFilter?: any, customAssetArtifacts?: AssetArtifact[] | AssetArtifactWithBlock[]) {
-    if(customAssetArtifacts) {
-      let assetArtifacts: AssetArtifactWithBlock[];
-
-      customAssetArtifacts.map((assetArtifact) => {
-        if ('startBlock' in assetArtifact)
-          assetArtifacts.push(assetArtifact);
-        else
-         assetArtifacts.push({assetArtifact, startBlock: 0})
-      })
-
-      return getProtocol(name, bloomFilter, assetArtifacts);
-    }
-
-    return getProtocol(name, bloomFilter);
   }
 }

@@ -17,12 +17,9 @@ export { initWallets, getWallet } from './wallets'
 
 export { OiContractFactory } from './contracts';
 export { OiContractConnector, OiContractConnectorParams } from './connectors';
-export { OiChainTokenSupplyProducer } from './producers/supply';
 export { OiProviderFactory, OiProvidersList } from './providers';
 export { OiEventIndexer } from './indexer';
 export { OiSubscriberFactory } from './subscriber';
-export { OiChainProtocol, useProtocol } from './protocols';
-export { OiTokenProtocol } from './token';
 export { OiApi } from './api';
 
 // Users use OiChain to access the blockchain.
@@ -35,22 +32,3 @@ import './plugin';
 
 let chain: OiChain;
 
-/**
- * Singleton for chain instances, returns an OiChain which is used connect
- * smart contracts, retrieve producers / consumers and initiate apis.
- * 
- * @returns A chain instance.
- */
-export async function getOiChain(): Promise<OiChain> {
-  if(!chain) {
-    chain = new OiChain();
-    // Make sure APIs are available.
-    // await initAPIs();
-
-    //TODO once proper plugin-structure is available
-    // init wallets here via
-    // await initWallets(config from openibex.chain)
-  } 
-
-  return chain;
-}

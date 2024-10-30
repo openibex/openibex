@@ -197,4 +197,16 @@ export class OiCore extends OiPlugin {
 
   //TODO: onUpdateValue(dottedName: string, callback: (key, value) => {})
 
+  /**
+   * Opens a database in read / write mode.
+   * 
+   * @param name - DB identifier
+   * @param revision - Schema revision
+   * @param type - Orbitdb Type, includes registered custom types.
+   * @returns An OrbitDB Database of the specified type.
+   */
+  public async getDB(revision: number, type: string, name: string, tag?: string): Promise<any> {
+    return await this.appDbManager.getDB(revision, type, name, tag);
+  }
+
 }

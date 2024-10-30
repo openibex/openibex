@@ -56,7 +56,7 @@ export class OiEventIndexer{
   public async init(eventProcessor: (...args: any[]) => Promise<void>, onBlockComplete: (event: string, block: number) => Promise<void> ) {
     this.processorCallback = eventProcessor;
     this.onBlockCompleteCallback = onBlockComplete;
-    this.processedDB = await plugin.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
+    this.processedDB = await plugin.db.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
 
     // Track peers that connect to this database, hence run indexers as well.
     // FIXME @Lukas Argument of type '(peerId: any, heads: any) => Promise<void>' is not assignable to parameter of type 'never'.

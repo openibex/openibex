@@ -1,9 +1,8 @@
 import { OiKeyValueExtended, OiPlugin } from "@openibex/core";
-import { KeyValue } from "@orbitdb/core";
 import { id, toBeArray } from "ethers"
 import { AssetArtifact, caipFactory, ChainArtifact } from "./caip";
 
-import { plugin, pluginName, pluginNamespace } from "../plugin";
+import { plugin } from "../plugin";
 
 /**
  * Resolver creates unique id's, known as tags, out of CAIP types. This saves storage amongst the databases
@@ -12,7 +11,7 @@ import { plugin, pluginName, pluginNamespace } from "../plugin";
 let resolverDB: OiKeyValueExtended<Uint8Array>;
 
 plugin.onInit('resolver', async (name: string, config: any, plugin: OiPlugin) : Promise<void> => {
-  resolverDB = await plugin.getDB(1, 'oikeyvalue-extended', 'resolver') as unknown as OiKeyValueExtended<Uint8Array>;
+  resolverDB = await plugin.db.getDB(1, 'oikeyvalue-extended', 'resolver') as unknown as OiKeyValueExtended<Uint8Array>;
 });
 
 /**
