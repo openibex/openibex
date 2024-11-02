@@ -1,38 +1,5 @@
-import { ChainArtifact, getCAIPChain, getChainName } from '../resolver';
-import { pluginConfig } from '../plugin';
-import { isSupportedPlatform } from './providers';
-
-const rateLimiters: {
-  [chainId: string]: {
-    [type: string]: OiRateLimiter;
-  };
-} = {};
-
-/**
- * Returns a rate limiter for a specific provider on a specific chain.
- * 
- * @param chainArtifact Chain is determined from the passed ChainArtifact.
- * @param providerType Provider type according to config.
- * @returns 
- */
-export function getRateLimiter(chainArtifact: ChainArtifact, providerType: string = 'default'): OiRateLimiter {
-  isSupportedPlatform(chainArtifact);
-  const chain = getCAIPChain(chainArtifact);
-  const chainName = getChainName(chain);
-  const chainStr = chain.toString();
-  if (!(chainStr in rateLimiters)) {
-    rateLimiters[chainStr] = {};
-  }
-
-  if (providerType in rateLimiters[chainStr]) {
-    return rateLimiters[chainStr][providerType];
-  }
-
-  const rateLimit = pluginConfig[chain.namespace]['networks'][chainName].providers[providerType]['settings'].rateLimit;
-  rateLimiters[chainStr][providerType] = new OiRateLimiter(rateLimit);
-
-  return rateLimiters[chainStr][providerType];
-}
+import { ChainArtifact } from '../caip';
+import { caip, pluginConfig } from '../plugin';
 
 /**
  * Rate limiters are initiated once per network. They're intended to limit heavy
@@ -45,8 +12,9 @@ export class OiRateLimiter {
   private isProcessing: boolean = false;
   private requestTimestamps: number[] = [];
 
-  constructor(rateLimit: number) {
+  constructor(rateLimit: number, interval: number = 60000) {
     this.rateLimit = rateLimit;
+    this.interval = interval;
   }
 
   /**

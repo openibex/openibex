@@ -93,7 +93,6 @@ async function initOiCore(config: OiConfig, logger: OiLoggerInterface): Promise<
   const coreDB = await openDatabase(config.database.address, 'keyvalue') as unknown as KeyValue<OiCoreSchema>;
   
   await initPlugins(config, coreDB, logger);
-  coreInitLock = false;
 }
 
 class BaseLogger implements OiLoggerInterface {
@@ -138,7 +137,7 @@ export class OiCore extends OiPlugin {
    * @param logger A logger object.
    */
   constructor(config: OiConfig) {
-    super('core', 'openibex');
+    super('core', 'openibex', {});
 
     this.dbConf = config.database;
     this.heliaConf = config.helia;
@@ -155,7 +154,7 @@ export class OiCore extends OiPlugin {
   public async init(config: any, coreDB: KeyValue<OiCoreSchema>, logger: any): Promise<void> {
     super.init(config, coreDB, logger);
 
-    this.appDbManager = new OiDbManager(`${config.database.namespace}`, logger, coreDB);
+    this.appDbManager = new OiDbManager(`${this.dbConf.namespace}`, logger, coreDB);
     this.valuesDB = await this.appDbManager.getDB(1, 'keyvalue', `values`) as unknown as KeyValue<any>;
   }
 
@@ -178,7 +177,7 @@ export class OiCore extends OiPlugin {
   public async setVal(value: any, name: string, tag?: string): Promise<void> {
     if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
 
-    await this.valuesDB.put(`${this.pluginNamespace}.${this.pluginName}.${name}.${tag ? '.' + tag : ''}`, value);
+    await this.valuesDB.put(`${this.namespace}.${this.name}.${name}.${tag ? '.' + tag : ''}`, value);
   }
 
   /**
@@ -192,7 +191,7 @@ export class OiCore extends OiPlugin {
   public async getVal(name: string, tag?: string): Promise<any> {
     if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
 
-    return this.valuesDB.get(`${this.pluginNamespace}.${this.pluginName}.${name}.${tag ? '.' + tag : ''}`);
+    return this.valuesDB.get(`${this.namespace}.${this.name}.${name}.${tag ? '.' + tag : ''}`);
   }
 
   //TODO: onUpdateValue(dottedName: string, callback: (key, value) => {})
@@ -208,5 +207,4 @@ export class OiCore extends OiPlugin {
   public async getDB(revision: number, type: string, name: string, tag?: string): Promise<any> {
     return await this.appDbManager.getDB(revision, type, name, tag);
   }
-
 }

@@ -1,9 +1,8 @@
 import { ERC173abi } from "./abi";
-import { AssetArtifact, useABI, useContractConnector,  OiChainTokenSupplyProducer, OiContractConnectorParams, OiContractConnector  } from "@openibex/chain";
+import { AssetArtifact, OiContractConnectorParams, OiContractConnector  } from "@openibex/chain";
 import { AccountId } from "caip";
 import { EventLog } from "ethers";
-import { EthereumEventIndexer } from '../indexer';
-import { OiChainLogProducer } from "@openibex/chain/src/producers";
+import { EthereumEventIndexer } from '../chain';
 
 /**
  * The OiErc173Connector implements the Ownable interface and processes its events.
@@ -31,6 +30,3 @@ export class OiErc173Connector extends OiContractConnector {
     return { block: event.blockNumber, caipTagPreviousOwner, caipTagNewOwner, event }
   }
 }
-
-useContractConnector('erc173', OiErc173Connector, 'eip155');
-useABI('eip155', 'erc173', ERC173abi);

@@ -1,7 +1,6 @@
-import { AssetArtifact } from "../resolver";
-import { getContractAPI, OiApi } from "../api";
-import { OiChainScraper } from "./scraper";
 import { OiDataConsumer } from "@openibex/core";
+import { AssetArtifact, chain, OiContractAPI} from "@openibex/chain";
+import { OiChainScraper } from "./scraper";
 
 export type AssetArtifactWithBlock = {
   assetArtifact: AssetArtifact, startBlock: number
@@ -90,10 +89,9 @@ export class OiChainProtocol {
   /**
    * Returns the API for this protocol.
    */
-  public async getAPI(assetArtifact: AssetArtifact, walletName?: string): Promise<OiApi> {
+  public async getAPI(assetArtifact: AssetArtifact, walletName?: string): Promise<OiContractAPI> {
     //TODO: assetArtifacts needs to be in the artifact list.
-
-    return await getContractAPI(assetArtifact, walletName);
+    return await chain.contract(assetArtifact).getAPI(walletName);
   }
 
   /**

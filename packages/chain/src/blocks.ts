@@ -1,37 +1,31 @@
 import { ChainId } from "caip";
-import { getCAIPChain } from "./resolver";
-import type {ChainArtifact} from "./resolver";
-import { getChainProvider } from "./providers";
-import { subscribeBlocks } from "./subscriber";
+import type { ChainArtifact } from "./caip";
+import { caip } from "./plugin";
 
-let blocks: {[key: string]: number} = {};
+export class OiBlockHandler {
+  protected chainId: ChainId;
 
-/**
- * Internal function, keeps track of the latest blocks without
- * requiring additional requests. This is achieved through
- * subscription to the latest block event in the chain-specific
- * provider.
- * 
- * @param chainId Chain the block is for.
- * @param block Block number
- */
-function trackBlocks(chainId: ChainId, block: number) {
-  blocks[chainId.toString()] = block;
-}
-
-/**
- * Returns the latest block number of the respective chain.
- * 
- * @param chainId The chain for which to retrieve.
- * @returns 
- */
-export async function latestBlock(chainId: ChainArtifact) {
-  const chain = getCAIPChain(chainId).toString();
-
-  if(!(chain in blocks)) {
-    subscribeBlocks(chainId, trackBlocks);
-    blocks[chain] = (await getChainProvider(chainId)).getBlockNumber();
+  constructor(chainArtifact: ChainArtifact) {
+    this.chainId = caip.getCAIPChain(chainArtifact);
+  }
+  /**
+   * Register a callback to receive the latest blocknumber.
+   * Ethereum: The block numbers are drawn from the provider keepalive without additional RPC-Requests
+   * 
+   * @param chainArtifact ChainId or other ChainArtifact
+   * @param callback 
+   */
+  public subscribeLatest(chainArtifact: ChainArtifact, callback: (chainId: ChainId, block: number) => void): Promise<void> {
+    throw new Error("Method 'latest' must be implemented on platform specific contract handler.");
   }
 
-  return blocks[chain];
+  /**
+   * Returns the latest block number of the respective chain.
+   * 
+   * @param chainId The chain for which to retrieve.
+   * @returns 
+   */
+  public latest(chainId: ChainArtifact): Promise<number> {
+    throw new Error("Method 'latest' must be implemented on platform specific contract handler.");
+  }
 }

@@ -1,6 +1,6 @@
-export { getChainProvider, getProviderSetting, isSupportedPlatform, isSupportedChain, addProviderFactory } from './providers';
-export { OiProviderFactory, OiProvidersList } from './provider';
-export { getRateLimiter, OiRateLimiter } from "./ratelimiter";
+
+export { OiProviderHandler, OiProvidersList } from './provider';
+export { OiRateLimiter } from "./ratelimiter";
 
 type OiChainPluginConfig = {
   className: string;

@@ -1,7 +1,7 @@
 import { OiNKeyValue } from "@openibex/core";
-import { AssetArtifact, } from "../resolver";
+import { AssetArtifact, } from "@openibex/chain";
 import { pluginName, pluginNamespace } from "../plugin";
-import { OiChainLogConsumer } from "./chainlog";
+import { OiChainLogConsumer } from "@openibex/chain";
 import { plugin } from "../plugin";
 
 /**

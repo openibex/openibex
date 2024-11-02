@@ -1,9 +1,6 @@
 import { OiNKeyValue } from "@openibex/core";
-import { AssetArtifact, tagCaipArtifact } from "../resolver";
-import { pluginName, pluginNamespace } from "../plugin";
-import { OiChainLogProducer } from "./chainlog";
-import { plugin } from "../plugin";
-import { getBurnAddress, getMintAddress } from "../utils";
+import { AssetArtifact, OiChainLogProducer, getBurnAddress, getMintAddress, tagResolver } from "@openibex/chain";
+import { plugin, pluginName, pluginNamespace } from "../plugin";
 
 /**
  * The state of supply (mints, burns, total) in that block.
@@ -51,8 +48,8 @@ export class OiChainTokenSupplyProducer extends OiChainLogProducer {
   }
 
   public async init() {
-    this.burnAddrTag = tagCaipArtifact(getBurnAddress(this.assetArtifact)) as string;
-    this.mintAddrTag = tagCaipArtifact(getMintAddress(this.assetArtifact)) as string;
+    this.burnAddrTag = tagResolver.tagCaipArtifact(getBurnAddress(this.assetArtifact)) as string;
+    this.mintAddrTag = tagResolver.tagCaipArtifact(getMintAddress(this.assetArtifact)) as string;
 
     this.supplyDb = await plugin.db.getDB(1, 'oinkeyvalue', 'supply', this.assetArtifactTag) as OiNKeyValue<TokenSupplyRecord>; 
   }

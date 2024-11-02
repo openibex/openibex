@@ -1,7 +1,7 @@
-import { AssetArtifact, OiApi } from "@openibex/chain";
+import { AssetArtifact, OiContractAPI } from "@openibex/chain";
 import { BaseContractMethod } from "ethers";
 
-export class OiEthereumApi extends OiApi {
+export class EthereumContractAPI extends OiContractAPI {
   constructor(assetArtifact: AssetArtifact, walletName?: string) {
     super(assetArtifact, walletName);
 

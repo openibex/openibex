@@ -1,6 +1,4 @@
-import { OiChainProtocol } from "@openibex/chain";
-import { AssetArtifactWithBlock } from "@openibex/chain/src/protocols";
-import { ProtocolMap } from "@openibex/chain/src/protocols/protocol";
+import { OiChainProtocol, AssetArtifactWithBlock, ProtocolMap } from '@openibex/protocols';
 import { AssetType } from "caip";
 
 export class OiUSDCircleProtocol extends OiChainProtocol {
@@ -32,6 +30,3 @@ export class OiUSDCircleProtocol extends OiChainProtocol {
   
   public datasetNames: string[] = ['supply'];
 }
-
-
-

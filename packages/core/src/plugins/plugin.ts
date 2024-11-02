@@ -1,6 +1,6 @@
 import { KeyValue } from "@orbitdb/core";
 import { OiLoggerInterface } from "../core";
-import { OiDbManager, openDatabase } from "../db";
+import { OiDbManager } from "../db";
 import { OiPluginService } from "./service";
 
 export type OiCoreSchema = { 
@@ -29,10 +29,11 @@ export type OiCoreSchema = {
 export class OiPlugin {
   private isInitialized: boolean = false;
 
-  protected pluginName: string;
-  protected pluginNamespace: string;
+  public name: string;
+  public namespace: string;
+  public conf: any = {};
 
-  protected initFragments: Record< string, (name: string, config: any, plugin: OiPlugin) => Promise<void>> = {};
+  protected initFragments: Record< string, (plugin: OiPlugin) => Promise<void>> = {};
   protected pluginServices: Record< string, OiPluginService> = {};
 
   public log!: OiLoggerInterface;
@@ -45,9 +46,10 @@ export class OiPlugin {
    * @param pluginName Name of the plugin.
    * @param pluginNamespace Namespace of the plugin.
    */
-  constructor(pluginName: string, pluginNamespace: string){
-    this.pluginName = pluginName;
-    this.pluginNamespace = pluginNamespace;
+  constructor(pluginName: string, pluginNamespace: string, defaultConfig: any){
+    this.name = pluginName;
+    this.namespace = pluginNamespace;
+    this.conf = defaultConfig;
   }
 
   /**
@@ -58,12 +60,16 @@ export class OiPlugin {
    * @param name Name of the module filing the init callback
    * @param callback The init callback.
    */
-  public onInit(name: string, callback: (name: string, config: any, plugin: OiPlugin) => Promise<void>) {
+  public onInit(name: string, callback: (plugin: OiPlugin) => Promise<void>) {
     this.initFragments[name] = callback;
+
+    if(this.isInitialized) {
+      this.initFragments[name](this);
+    }
   }
   
   /**
-   * Plugin initialization. Sets logger, coreDB, valueDB and calls all initFragments.
+   * Plugin initialization. Sets logger, coreDB and calls all initFragments.
    * 
    * @param config Application config object.
    * @param coreDB Core database
@@ -77,17 +83,20 @@ export class OiPlugin {
     this.isInitialized = true;
 
     this.log = logger;
-    this.db = new OiDbManager(`${this.pluginNamespace}.${this.pluginName}`, logger, coreDB);
+    this.db = new OiDbManager(`${this.namespace}.${this.name}`, logger, coreDB);
+    this.conf = config;
     
-    let promises = Object.keys(this.initFragments).map(fragName => 
-      this.initFragments[fragName](this.pluginName, config, this)
-    );
+    let promises = Object.keys(this.pluginServices).map( (serviceName) => { 
+      this.log.info(`Plugin ${this.namespace}.${this.name} initializing service ${serviceName}.`);
+      return this.pluginServices[serviceName].init(this);
+    });
+
     await Promise.all(promises);
 
-    promises = Object.keys(this.pluginServices).map(serviceName => 
-      this.pluginServices[serviceName].init()
-    );
-
+    promises = Object.keys(this.initFragments).map((fragName) => {
+      this.log.info(`Plugin ${this.namespace}.${this.name} initializing fragment ${fragName}.`);
+      return this.initFragments[fragName](this);
+    });
     await Promise.all(promises);
   }
 
@@ -96,8 +105,8 @@ export class OiPlugin {
   }
 
   public getPluginService(name?: string): OiPluginService {
-    if(!name) name = this.pluginName;
-    if(!this.pluginServices[name]) throw Error(`Service ${name} not found in ${this.pluginNamespace}.${this.pluginName}`);
+    if(!name) name = this.name;
+    if(!this.pluginServices[name]) throw Error(`Service ${name} not found in ${this.namespace}.${this.name}`);
 
     return this.pluginServices[name];
   }

@@ -1,6 +1,7 @@
-import { AssetArtifact, getContract, OiEventIndexer, subscribeContract, getRateLimiter, addPlatformIndexer } from "@openibex/chain";
-import { plugin } from "./plugin";
+import { AssetArtifact, OiEventIndexer, chain } from "@openibex/chain";
+import plugin from "../plugin";
 import { Contract, EventLog, ContractEventPayload } from "ethers";
+import { OiRateLimiter } from "@openibex/chain";
 
 /**
  * Ethereum-specific indexer using ethers.
@@ -26,7 +27,7 @@ export class EthereumEventIndexer extends OiEventIndexer{
    * Called internally.
    */
   protected async subscribe() {
-    await subscribeContract(this.assetArtifact, this.eventName, async (...args: any) => { await this.processEvent(...args); }, this.bloomFilters);
+    await chain.contract(this.assetArtifact).subscribe(this.eventName, async (...args: any) => { await this.processEvent(...args); }, this.bloomFilters);
   }
 
   /**
@@ -38,14 +39,14 @@ export class EthereumEventIndexer extends OiEventIndexer{
    */
   protected async importBatch(startBlock: number, endBlock: number): Promise<any[]> {
     if(!this.importer) {
-      this.importer = await getContract(this.assetArtifact);
+      this.importer = await chain.contract(this.assetArtifact).get();
       this.importFilter = this.eventName;
       
       if (this.importFilter !== '*' && this.bloomFilters && this.bloomFilters.length > 0)
         this.importFilter = this.importer.filters[this.eventName](...this.bloomFilters);
     }
 
-    const rateLimiter = getRateLimiter(this.assetArtifact);
+    const rateLimiter = chain.provider(this.assetArtifact).getRateLimiter();
     return rateLimiter.execute(() => this.importer.queryFilter(this.importFilter, startBlock, endBlock));
   }
 
@@ -81,11 +82,6 @@ export class EthereumEventIndexer extends OiEventIndexer{
     }
 
     args.push(sendEvent)
-
-    plugin.log.info(`Log at ${sendEvent.blockNumber}-${sendEvent.index}: Arguments ${args.join(', ')}`);
     await super.processEvent(...args);
   }
 }
-
-// addPlatformIndexer('eip155', EthereumEventIndexer);
-

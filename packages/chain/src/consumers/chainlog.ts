@@ -1,6 +1,6 @@
 import { OiDataLogConsumer } from "@openibex/core";
-import { AssetArtifact, tagCaipArtifact } from "../resolver";
-import { pluginName, pluginNamespace } from "../plugin";
+import { AssetArtifact } from "../caip";
+import { pluginName, pluginNamespace, tagResolver } from "../plugin";
 
 /**
  * ChainLog is a blockchain-specific type of DataSeries designed to aggregate events
@@ -27,13 +27,13 @@ export class OiChainLogConsumer extends OiDataLogConsumer {
    * @param plugin Plugin name, used for DB-Name
    */
   constructor(assetArtifact: AssetArtifact, producerName: string, namespace = pluginNamespace, plugin = pluginName) {
-    super(pluginNamespace, pluginName, producerName, tagCaipArtifact(assetArtifact) as string);
+    super(pluginNamespace, pluginName, producerName, tagResolver.tagCaipArtifact(assetArtifact) as string);
 
     this.consumerName = producerName;
     this.pluginName = plugin;
     this.pluginNamespace = namespace;
 
     this.assetArtifact = assetArtifact;
-    this.assetArtifactTag = tagCaipArtifact(assetArtifact) as string;
+    this.assetArtifactTag = tagResolver.tagCaipArtifact(assetArtifact) as string;
   }
 }

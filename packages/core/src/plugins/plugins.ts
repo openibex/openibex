@@ -38,7 +38,8 @@ export async function initPlugins(config: OiConfig, coreDB: any, logger: OiLogge
       await initializePlugin(depNamespace, depName, config.plugins[depNamespace]?.[depName] || {});
     }
 
-    await pluginEntry.plugin.init(pluginConf.config, coreDB, logger);
+    await pluginEntry.plugin.init(pluginConf, coreDB, logger);
+    logger.info(`Initialized plugin ${pluginKey}.`)
     initializedPlugins.add(pluginKey);
   };
 

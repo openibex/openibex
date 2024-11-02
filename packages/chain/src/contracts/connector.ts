@@ -1,6 +1,7 @@
-import { AssetArtifact, ChainArtifact, tagCaipArtifact, addCaipTagResolver} from "../resolver";
+import { AssetArtifact, ChainArtifact } from "../caip";
+import { tagResolver } from "../plugin";
 import { OiChainLogProducer } from "../producers/chainlog";
-import { OiEventIndexer } from "../indexer";
+import { OiEventIndexer } from "./indexer";
 
 export type OiContractConnectorParams = {
   resolve?: boolean,
@@ -27,7 +28,7 @@ export class OiContractConnector {
   protected eventProcessors: Record<string, (...args: unknown[]) => Promise<unknown[]>> = {};
   protected eventPostProcessors: Record<string, (...args: unknown[]) => Promise<unknown[]>> = {};
 
-  protected resolver: boolean;
+  protected resolve: boolean;
 
   constructor(assetArtifact: AssetArtifact, params?: OiContractConnectorParams, bloomFilter?: string[][]) {
     this.assetArtifact = assetArtifact;
@@ -37,7 +38,7 @@ export class OiContractConnector {
 
     this.bloomFilter = bloomFilter;
     this.startBlock = params?.startBlock ? params.startBlock : 0;
-    this.resolver = params?.resolve ? params.resolve : false;
+    this.resolve = params?.resolve ? params.resolve : false;
   }
 
   /**
@@ -178,10 +179,10 @@ export class OiContractConnector {
 
     for (const artifact of artifacts) {
       // If resolve is true, call addCaipArtifact and wait for it to complete
-      if (this.resolver) {
-        tags.push(await addCaipTagResolver(artifact) as string);
+      if (this.resolve) {
+        tags.push(await tagResolver.addCaipTagResolver(artifact) as string);
       } else {
-        tags.push(tagCaipArtifact(artifact) as string);
+        tags.push(tagResolver.tagCaipArtifact(artifact) as string);
       }
     }
 

@@ -1,8 +1,9 @@
 import { AccountId } from "caip";
-import { ChainArtifact, getCAIPChain } from "./resolver";
+import { ChainArtifact } from "./caip";
+import { caip } from './plugin';
 
 export function getMintAddress(chainArtifact: ChainArtifact) {
-  const chainId = getCAIPChain(chainArtifact);
+  const chainId = caip.getCAIPChain(chainArtifact);
 
   if (chainId.namespace == 'eip155'){
     return new AccountId({chainId, address: "0x0000000000000000000000000000000000000000" });
@@ -12,7 +13,7 @@ export function getMintAddress(chainArtifact: ChainArtifact) {
 }
 
 export function getBurnAddress(chainArtifact: ChainArtifact) {
-  const chainId = getCAIPChain(chainArtifact);
+  const chainId = caip.getCAIPChain(chainArtifact);
 
   if (chainId.namespace == 'eip155'){
     return new AccountId({chainId, address: "0xffffffffffffffffffffffffffffffffffffffff" });

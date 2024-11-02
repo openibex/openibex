@@ -1,8 +1,9 @@
-import { useProtocol, OiChainProtocol, AssetArtifactWithBlock } from "../protocols";
+import { plugin, protocols } from "../plugin";
+import { OiChainProtocol, type AssetArtifactWithBlock, type ProtocolMap } from "../protocol";
 
 export class OiTokenProtocol extends OiChainProtocol {
 
-  public protocolMap = {
+  public protocolMap: ProtocolMap = {
     'token': {
       'eip155': 'erc20',
       'solana': 'token',
@@ -26,5 +27,3 @@ export class OiTokenProtocol extends OiChainProtocol {
 
   }
 }
-
-useProtocol('token', {eip155: 'erc20', solana: 'token', hedera: 'token'}, OiTokenProtocol);

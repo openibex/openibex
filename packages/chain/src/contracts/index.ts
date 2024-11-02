@@ -1,2 +1,4 @@
-export { addContractFactory, useABI, getContract } from './contracts';
-export { OiContractFactory } from './contract';
+export { OiContractHandler } from './contract';
+export { OiContractConnector, type OiContractConnectorParams } from './connector';
+export { OiContractAPI } from './api';
+export { OiEventIndexer } from './indexer';

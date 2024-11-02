@@ -1,12 +1,49 @@
-import { AssetArtifact } from "@openibex/chain";
-import { AssetArtifactWithBlock } from "./protocols/protocol";
-import { getProtocol } from "./protocols/protocols";
 import { OiPluginService } from "@openibex/core";
+import { AssetArtifact, caip, chain } from "@openibex/chain";
+import { AssetArtifactWithBlock, OiChainProtocol } from "./protocol";
 
+export class OiChainProtocols extends OiPluginService {
+  protected protocolRegister: { [protocol: string]: typeof OiChainProtocol } = {};
+  protected protocolHandles: Record<string, Record<string, string>> = {};
 
-class Protocols extends OiPluginService {
+  /**
+   * Retrieves a protocol based on the handles map. I.e. contracts on testnets.
+   * Example: ...
+   * @param assetArtifact Asset Artifact
+   * @param startBlock 
+   * @param bloomFilter 
+   * @returns 
+   */
+  public getForArtifact(assetArtifact: AssetArtifact, startBlock: number, bloomFilter?: any) {
+    const platform = caip.getCAIPChain(assetArtifact).namespace;
+    const namespace = assetArtifact.assetName.namespace;
+
+    if(!this.protocolHandles[platform]) {
+      throw Error(`Platform ${platform} is not configured. Cant retrieve protocol for ${assetArtifact.toString()}`);
+    }
+
+    if(!this.protocolHandles[platform][namespace]) {
+      throw Error(`Asset ${namespace} of ${assetArtifact.toString()} does not have a protocol.`);
+    }
+
+    return this.get(this.protocolHandles[platform][namespace], bloomFilter, [{assetArtifact, startBlock}]);
+  }
+
+  /**
+   * Returns a protocol instance.
+   * 
+   * @param protocolName 
+   * @param bloomFilter 
+   * @param customAssetArtifacts 
+   * @returns 
+   */
+  public get(protocolName: string, bloomFilter?: any, customAssetArtifacts?: AssetArtifact[] | AssetArtifactWithBlock[]) {
+    const protocol = this.protocolRegister[protocolName];
   
-  public async getProtocol(name: string, bloomFilter?: any, customAssetArtifacts?: AssetArtifact[] | AssetArtifactWithBlock[]) {
+    if (!protocol) {
+      throw new Error(`Protocol ${protocolName} not found.`);
+    }
+  
     if(customAssetArtifacts) {
       let assetArtifacts: AssetArtifactWithBlock[];
 
@@ -17,9 +54,31 @@ class Protocols extends OiPluginService {
          assetArtifacts.push({assetArtifact, startBlock: 0})
       })
 
-      return getProtocol(name, bloomFilter, assetArtifacts);
+      return new protocol(bloomFilter, assetArtifacts);
     }
 
-    return getProtocol(name, bloomFilter);
+    return new protocol(bloomFilter);
+  }
+
+  /**
+   * Register a protocol. 
+   * 
+   * @param name Name, i.e. usd-circle
+   * @param handles Mappings between contract ABI and protocol.
+   * @param protocol 
+   */
+  public register(name: string, handles: Record<string, string>, abis: Record<string, any>, protocol: typeof OiChainProtocol) {
+    this.protocolRegister[name] = protocol;
+
+    for (const [namespace, handleName] of Object.entries(handles)) {
+      if (!this.protocolHandles[namespace]) {
+        this.protocolHandles[namespace] = {};
+      }
+      this.protocolHandles[namespace][handleName] = name;
+    }
+
+    for(const [platform, abi] of Object.entries(abis)) {
+      chain.registerContract(platform, name, abi );
+    }
   }
 }

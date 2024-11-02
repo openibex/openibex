@@ -1,6 +1,6 @@
 import { Wallet, HDNodeWallet } from "ethers";
-import { type AssetArtifact, ChainArtifact, getCAIPChain } from "./resolver";
-import { plugin } from "./plugin";
+import { type AssetArtifact, ChainArtifact } from "./caip";
+import { plugin, caip } from "./plugin";
 import * as fs from 'fs';
 import { AccountId } from "caip";
 
@@ -41,7 +41,7 @@ export function initWallets(pluginConf: any) {
  * @returns 
  */
 export function getWallet(walletName: string, chainArtifact: ChainArtifact) {
-  const namespace = getCAIPChain(chainArtifact).namespace;
+  const namespace = caip.getCAIPChain(chainArtifact).namespace;
 
   if(namespace && wallets[namespace][walletName])
     return wallets[namespace][walletName];

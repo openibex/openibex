@@ -8,6 +8,7 @@ export { registerOiPlugin, OiPlugin, OiPluginService} from './plugins';
 export {OiDataProducer, OiDataLogProducer, OiDataSeriesProducer, OiDataKeyValueProducer, OiDataSetProducer, OiDataStoreProducer, OiPipelineProducer } from './producers';
 export {OiDataConsumer, OiDataLogConsumer, OiDataKeyValueConsumer, OiDataSetConsumer, OiDataStoreConsumer, OiPipelineConsumer } from './consumers';
 
+export { type OiCoreSchema } from './plugins';
 
 // Database Types
 export type { OiDbElements, OiDbSchema, OiKeyValueExtended, OiNKeyValue  } from './db';

@@ -1,9 +1,6 @@
 import { OiNKeyValue, getNodeId } from "@openibex/core";
-import { getSubscriptionId } from "../subscriber";
-import { latestBlock } from "../blocks";
-import { plugin } from "../plugin";
-import { getProviderSetting, } from "../providers";
-import { AssetArtifact } from "../resolver";
+import { chain, plugin } from "../plugin";
+import { AssetArtifact } from "../caip";
 
 /**
  * Generic indexer class. All other indexers are inherited from this class.
@@ -40,7 +37,7 @@ export class OiEventIndexer{
    * @param bloomFilters Filters for import.
    */
   public constructor(assetArtifact: AssetArtifact, eventName: string, startBlock: number | string, bloomFilters?: any) {
-    this.subscriptionId = getSubscriptionId(assetArtifact, eventName, bloomFilters)
+    this.subscriptionId = chain.contract(assetArtifact).getSubscriptionId( eventName, startBlock, bloomFilters)
     this.assetArtifact = assetArtifact;
     this.eventName = eventName;
     this.startBlock = startBlock;
@@ -127,10 +124,10 @@ export class OiEventIndexer{
    */
   protected async import(fromBlock: number) {
     let lastBlock: number = fromBlock - 1;
-    const batchSize: number = getProviderSetting(this.assetArtifact, 'batchSize');
+    const batchSize: number = chain.provider(this.assetArtifact).getSetting('batchSize');
     
-    for (let startBlock = fromBlock; startBlock <= await latestBlock(this.assetArtifact); startBlock += batchSize) {
-      const endBlock = Math.min(startBlock + batchSize - 1, await latestBlock(this.assetArtifact));
+    for (let startBlock = fromBlock; startBlock <= await chain.blocks(this.assetArtifact).latest(this.assetArtifact); startBlock += batchSize) {
+      const endBlock = Math.min(startBlock + batchSize - 1, await chain.blocks(this.assetArtifact).latest(this.assetArtifact));
       const events = await this.importBatch(startBlock, endBlock);
   
       plugin.log.info(`Found ${events.length} events for ${this.assetArtifact} in blocks ${startBlock} to ${endBlock}`);

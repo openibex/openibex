@@ -1,6 +1,6 @@
 import { Contract, AbiCoder, ethers, FunctionFragment } from "ethers";
-import type { AssetArtifact } from "../resolver";
-import { getContract } from "../contracts";
+import type { AssetArtifact } from "../caip";
+import { chain } from '../plugin';
 
 /**
  * OiApi is a smart contract API wrapper, that wraps API functions in a chain-agnostic
@@ -8,7 +8,7 @@ import { getContract } from "../contracts";
  * 
  * It can use on-chain data as well as off-chain OrbitDB databases and producers / consumers.
  */
-export class OiApi {
+export class OiContractAPI {
 
   public contract: Promise<Contract>;
   public walletName: any;
@@ -22,7 +22,7 @@ export class OiApi {
   constructor(assetArtifact: AssetArtifact, walletName?: string) {
     this.walletName = walletName;
     this.assetArtifact = assetArtifact;
-    this.contract = getContract(assetArtifact, walletName);
+    this.contract = chain.contract(assetArtifact).get(walletName);
   }
 
   public getRawContract(): Promise<Contract> {

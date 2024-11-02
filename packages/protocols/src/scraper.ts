@@ -1,6 +1,5 @@
-import { getContractConnector, OiContractConnector } from "../connectors";
-import { plugin } from "../plugin";
-import { isSupportedChain } from "../providers";
+import { OiContractConnector, chain } from "@openibex/chain";
+import { plugin } from "./plugin";
 import { AssetArtifactWithBlock, ProtocolMap } from "./protocol";
 
 /**
@@ -16,6 +15,7 @@ import { AssetArtifactWithBlock, ProtocolMap } from "./protocol";
 export class OiChainScraper {
   protected assetArtifacts: AssetArtifactWithBlock[] = [];
   protected connectors: OiContractConnector[] = [];
+  protected bloomFilter: string[][]
 
   private protocolMap: ProtocolMap;
 
@@ -25,9 +25,11 @@ export class OiChainScraper {
    * @param assetArtifacts List of AssetArtifacts to connect to.
    * @param params Scraper config
    */
-  public constructor(assetArtifacts: AssetArtifactWithBlock[], protocolMap: ProtocolMap, params?: any) {
+  public constructor(assetArtifacts: AssetArtifactWithBlock[], protocolMap: ProtocolMap, bloomFilter?: string[][], params?: any) {
     for( const artifact of assetArtifacts) {
-      if (!isSupportedChain(artifact.assetArtifact)) {
+      try {
+        chain.provider(artifact.assetArtifact);
+      } catch {
         plugin.log.warn(`Cant scrape ${artifact.assetArtifact.toString()} - Chain or platform not supported.`);
         continue;
       }
@@ -35,6 +37,7 @@ export class OiChainScraper {
       this.assetArtifacts.push(artifact);
     }
 
+    this.bloomFilter = bloomFilter
     this.protocolMap = protocolMap;
   }
 
@@ -51,7 +54,7 @@ export class OiChainScraper {
           continue;
         }
         const connectorName = this.protocolMap[setName][namespace];
-        this.connectors.push(await getContractConnector(artifact.assetArtifact, {startBlock: artifact.startBlock}, connectorName));
+        this.connectors.push(await chain.contract(artifact.assetArtifact).getConnector({startBlock: artifact.startBlock}, this.bloomFilter, connectorName));
       } 
     }));
 

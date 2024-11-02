@@ -1,9 +1,7 @@
-import { ERC20abi } from "./abi";
-import { AssetArtifact, useABI, useContractConnector, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
-import { plugin } from "../plugin";
+import { AssetArtifact, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
 import { AccountId } from "caip";
 import { EventLog } from "ethers";
-import { EthereumEventIndexer } from "../indexer";
+import { EthereumEventIndexer } from "../chain";
 
 /**
  * The OiErc20Connector is listening to the standard events of ERC20 and creates a few producers:
@@ -32,13 +30,8 @@ export class OiErc20Connector extends OiContractConnector {
     const fromAccount = new AccountId({chainId: this.assetArtifact.chainId, address: from});
     const toAccount = new AccountId({chainId: this.assetArtifact.chainId, address: to});
 
-    const [caipTagFrom, caipTagTo] = await super.tagAndResolve(fromAccount, toAccount);
-    
-    plugin.log.info(`ERC20 transfer on ${this.assetArtifact.toString()} of ${amount}, from ${fromAccount.toString()}, to ${toAccount.toString()}`);
-
-    return { block: event.blockNumber, caipTagFrom, caipTagTo, amount, event}
+    const [fromAddress, toAddress] = await super.tagAndResolve(fromAccount, toAccount);
+   
+    return { block: event.blockNumber, fromAddress, toAddress, amount, event}
   }
 }
-
-await useContractConnector('erc20', OiErc20Connector, 'eip155');
-await useABI('eip155', 'erc20', ERC20abi);

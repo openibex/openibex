@@ -1,11 +1,9 @@
-import { OiEthereumApi } from "../api";
-import { useContractAPI } from "@openibex/chain";
+import {  EthereumContractAPI } from "../chain";
 
 /**
  * API of the ERC20 contract
  */
-export class OiErc20Api extends OiEthereumApi {
+export class OiErc20API extends EthereumContractAPI {
   
 }
 
-useContractAPI("erc20", OiErc20Api)
