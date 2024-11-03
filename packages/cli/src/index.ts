@@ -91,7 +91,7 @@ async function main() {
     (yargs) => {
       // FIXME move this to startArgs in start.ts
       return yargs.option('connect', {
-        describe: 'This command connects any protocol that has a connector. Example: ERC20 (USDC) on ETH eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        describe: 'This command connects any contract that has a connector. Example: ERC20 (USDC) on ETH eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         default: undefined,
         demandOption: false
       }).option('block', {
