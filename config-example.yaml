@@ -28,57 +28,57 @@ plugins:
     chain:
       # CAIP Notation aligned but with a human readable identifier.
       # Ethereum mainnet
-      eip155: # CAIP-2 Ethereum EVM Stack
-        wallets:
+  ethereum: # CAIP-2 Ethereum EVM Stack
+    wallets:
+      default:
+        file: wallets/eip155/default.json
+        password: test
+      alice:
+        file: wallets/eip155/alice.json
+        password: test
+    networks:
+      mainnet: 
+        chainId: 1 # CAIP-2 chain ID, here it's Ethereum.
+        plugins:
+          etherscan:
+            className: EtherscanPlugin
+            params:
+              url: https://exp.example.com
+              #api_key:
+              #api_user:
+        providers:
+          default: # Provider type, default is choosen automatically, and is websocket.
+            className: DefaultProvider
+            settings:
+              # Optional rate limits only apply to requests enqueued through rate limiter.
+              # If you're using a distributed RPC provider that has the same key for multiple
+              # networks, total rate limits need to be distributed between those networks.
+              #
+              # Also consider reserves non-limited requests (i.e. transactions).
+              # Rate-limit is in reqs/min.
+              rateLimit: 3
+              # Size of the import batches
+              batchSize: 5000
+            params:
+              # Endpoint can be an url or a preconfigured ethers network.
+              # See: TBD (mainnet, optimism, various testnets)
+              endpoint:  https://example.com/<someKey>
+          rpc:
+            className: RpcProvider
+            params:
+              endpoint: https://example.com/<someKey>
+      testnet:
+        chainId: 10000
+      hardhat:
+        chainId: 31337
+        providers:
           default:
-            file: wallets/eip155/default.json
-            password: test
-          alice:
-            file: wallets/eip155/alice.json
-            password: test
-        networks:
-          mainnet: 
-            chainId: 1 # CAIP-2 chain ID, here it's Ethereum.
-            plugins:
-              etherscan:
-                className: EtherscanPlugin
-                params:
-                  url: https://exp.example.com
-                  #api_key:
-                  #api_user:
-            providers:
-              default: # Provider type, default is choosen automatically, and is websocket.
-                className: DefaultProvider
-                settings:
-                  # Optional rate limits only apply to requests enqueued through rate limiter.
-                  # If you're using a distributed RPC provider that has the same key for multiple
-                  # networks, total rate limits need to be distributed between those networks.
-                  #
-                  # Also consider reserves non-limited requests (i.e. transactions).
-                  # Rate-limit is in reqs/min.
-                  rateLimit: 3
-                  # Size of the import batches
-                  batchSize: 5000
-                params:
-                  # Endpoint can be an url or a preconfigured ethers network.
-                  # See: TBD (mainnet, optimism, various testnets)
-                  endpoint:  https://example.com/<someKey>
-              rpc:
-                className: RpcProvider
-                params:
-                  endpoint: https://example.com/<someKey>
-          testnet:
-            chainId: 10000
-          hardhat:
-            chainId: 31337
-            providers:
-              default:
-                className: DefaultProvider
-                settings:
-                  rateLimit: 3
-                  batchSize: 5000
-                params:
-                  endpoint: http://127.0.0.1:8545/
+            className: DefaultProvider
+            settings:
+              rateLimit: 3
+              batchSize: 5000
+            params:
+              endpoint: http://127.0.0.1:8545/
 
 
 # Helia configuration, see system diagram in: https://github.com/ipfs/helia
