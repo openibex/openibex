@@ -2,7 +2,7 @@ import { getOiCore, OiConfig, OiCore } from '@openibex/core';
 import { oiLogger } from './logger';
 import 'yargs'
 
-import { chain, initWallets } from '@openibex/chain';
+import { initWallets, OiChain } from '@openibex/chain';
 import { AssetType } from 'caip-js';
 
 /**
@@ -12,7 +12,8 @@ import { AssetType } from 'caip-js';
  */
 export async function executeContractFunction(config: OiConfig, argv: any) {
   const core: OiCore = await getOiCore(config, oiLogger);
-
+  const chain: OiChain = await core.getService('openibex.chain', 'chain') as OiChain;
+  
   oiLogger.info(`Signer '${argv.signer}' calls ${argv.function}(${argv.args}) of ${argv.contract}`)
   // TODO with proper PluginStructure
   // initWallets shall be done within getOiChain, which initializes the plugin (as it is a singleton)

@@ -1,12 +1,12 @@
 import { getOiCore, OiConfig, OiCore } from '@openibex/core';
 import { oiLogger } from './logger';
 
-import { chain } from '@openibex/chain';
 import { AssetType } from 'caip-js';
 
 import '@openibex/ethereum';
 import '@openibex/usd-circle';
-import { protocols } from '@openibex/protocols';
+import { OiChain } from '@openibex/chain';
+import { OiChainProtocols } from '@openibex/protocols';
 
 /**
  * Start an initialized app.
@@ -16,6 +16,8 @@ import { protocols } from '@openibex/protocols';
 export async function startOpenIbex(config: OiConfig, argv: any) {
   oiLogger.info(`Starting the node with for dApp with address ${config.database.address}...`);
   const core: OiCore = await getOiCore(config, oiLogger);
+  const chain: OiChain = await core.getService('openibex.chain', 'chain') as OiChain;
+  const protocols: OiChainProtocols = await core.getService('openibex.protocols', 'protocols') as OiChainProtocols;
 
   if (argv.connect) {
     const connector = chain.contract(new AssetType(argv.connect)).getConnector({startBlock: argv.block? argv.block : 0});
