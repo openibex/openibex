@@ -1,31 +1,37 @@
 import { WebSocketProvider, JsonRpcProvider, getDefaultProvider, Provider } from 'ethers';
 import { OiProviderHandler, OiRateLimiter } from '@openibex/chain';
-import plugin from '../plugin';
-import { OiPlugin } from '@openibex/core';
+import EthereumPlugin from '../plugin';
+import { AccountId, ChainId } from 'caip';
+import { ChainArtifact } from '@openibex/chain';
+import { oiCorePlugins } from '@openibex/core';
 
 // Restructure the configuration for easier lookup
 export const chainMap = {};
-
-/**
- * Initializes the chainmap when the plugin is initialized. Chainmaps are mapping CAIP-Denominated chains
- * to human readable names (i.e. 'eip155:1' becomes 'mainnet' as it's Ethereum mainnet).
- */
-plugin.onInit('chainmap', async (plugin: OiPlugin) : Promise<void> => {
-  for (const chainName in plugin.conf['networks']) {
-    const chainId = plugin.conf['networks'][chainName].chainId;
-    chainMap[`eip155:${chainId}`] = chainName;
-  }
-});
-
 
 /**
  * Provider factory for Ethereum, based on ethers.
  */
 export class EthereumProviderHandler extends OiProviderHandler {
   /**
+   * plugin instance
+   */
+  private plugin: EthereumPlugin
+  /**
    * Provider instance.
    */
   protected provider!: Provider;
+
+  constructor(chainArtifact: ChainArtifact, providerName: string = 'default') {
+    super(chainArtifact, providerName);
+
+    const plugin = oiCorePlugins.getPlugin('openibex', 'ethereum');
+    this.plugin = plugin;
+    
+    for (const chainName in plugin.conf['networks']) {
+      const chainId = plugin.conf['networks'][chainName].chainId;
+      chainMap[`eip155:${chainId}`] = chainName;
+    }
+  }
 
   /**
    * Returns a specific instance of the provider.
@@ -37,8 +43,8 @@ export class EthereumProviderHandler extends OiProviderHandler {
    */
   public get(): Provider {
     if(!this.provider) {
-      const chainName = chainMap[this.chainId.toString()];
-      const providerConf = plugin.conf.networks[chainName].providers[this.providerName];
+      const chainName = chainMap[this.getChainId().toString()];
+      const providerConf = this.plugin.conf.networks[chainName].providers[this.providerName];
       const params = providerConf.params;
       const className = providerConf.className;
 
@@ -100,8 +106,8 @@ export class EthereumProviderHandler extends OiProviderHandler {
   public getSetting(
     settingName: string
   ): any {
-    const chainName = chainMap[this.chainId.toString()];
-    const providerConf = plugin.conf.networks[chainName].providers[this.providerName];
+    const chainName = chainMap[this.getChainId().toString()];
+    const providerConf = this.plugin.conf.networks[chainName].providers[this.providerName];
 
     return providerConf.settings[settingName];
   }
@@ -111,7 +117,7 @@ export class EthereumProviderHandler extends OiProviderHandler {
    * 
    * @returns 
    */
-  getRateLimiter(): OiRateLimiter {
+  public getRateLimiter(): OiRateLimiter {
     if(!this.rateLimiter) {
       this.rateLimiter = new OiRateLimiter(
         this.getSetting('rateLimit')
@@ -119,5 +125,15 @@ export class EthereumProviderHandler extends OiProviderHandler {
     }
 
     return this.rateLimiter;
+  }
+
+  public getMintAddress(): AccountId {
+    const chainId = this.getChainId();
+    return new AccountId({ chainId, address: "0x0000000000000000000000000000000000000000" });
+  }
+  
+  public getBurnAddress(): AccountId {
+    const chainId = this.getChainId();
+    return new AccountId({chainId, address: "0xffffffffffffffffffffffffffffffffffffffff" });
   }
 }

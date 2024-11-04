@@ -1,10 +1,17 @@
-import { registerOiPlugin } from "@openibex/core";
 import { OiPlugin } from "@openibex/core";
+import { RegisterPlugin } from "@openibex/core";
 
 // Plugin Config with defaults. Merged on init with config from core.
-const pluginDefaultConfig = {};
+const pluginDefaultConfig = {
+  wallets: {},
+  networks: {}
+};
 
-export const plugin: OiPlugin = new OiPlugin('usd-circle', 'openibex', pluginDefaultConfig);
+@RegisterPlugin()
+export default class USDCirclePlugin extends OiPlugin {}
 
-// Register the plugin
-registerOiPlugin('usd-circle', 'openibex', plugin, ['openibex.protocols']);
+new USDCirclePlugin('openibex', 'usd-circle', {
+  config: pluginDefaultConfig,
+  dependencies: [ 'openibex.protocols'],
+  services: {}
+});

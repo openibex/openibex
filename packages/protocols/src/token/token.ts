@@ -1,6 +1,7 @@
-import { plugin, protocols } from "../plugin";
+import { WithPluginServices } from "@openibex/core";
 import { OiChainProtocol, type AssetArtifactWithBlock, type ProtocolMap } from "../protocol";
 
+@WithPluginServices('openibex.protocols/protocols')
 export class OiTokenProtocol extends OiChainProtocol {
 
   public protocolMap: ProtocolMap = {

@@ -1,8 +1,12 @@
-import { OiPluginService } from "@openibex/core";
-import { AssetArtifact, caip, chain } from "@openibex/chain";
+import { OiPluginService, WithPluginServices } from "@openibex/core";
+import { AssetArtifact, OiCaipHelper, OiChain } from "@openibex/chain";
 import { AssetArtifactWithBlock, OiChainProtocol } from "./protocol";
 
+@WithPluginServices('openibex.chain/caip', 'openibex.chain/chain')
 export class OiChainProtocols extends OiPluginService {
+  public chain: OiChain;
+  public caip: OiCaipHelper;
+  
   protected protocolRegister: { [protocol: string]: typeof OiChainProtocol } = {};
   protected protocolHandles: Record<string, Record<string, string>> = {};
 
@@ -15,7 +19,7 @@ export class OiChainProtocols extends OiPluginService {
    * @returns 
    */
   public getForArtifact(assetArtifact: AssetArtifact, startBlock: number, bloomFilter?: any) {
-    const platform = caip.getCAIPChain(assetArtifact).namespace;
+    const platform = this.caip.getCAIPChain(assetArtifact).namespace;
     const namespace = assetArtifact.assetName.namespace;
 
     if(!this.protocolHandles[platform]) {
@@ -78,7 +82,7 @@ export class OiChainProtocols extends OiPluginService {
     }
 
     for(const [platform, abi] of Object.entries(abis)) {
-      chain.registerContract(platform, name, abi );
+      this.chain.registerContract(platform, name, abi );
     }
   }
 }

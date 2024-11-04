@@ -1,14 +1,14 @@
-import { Contract, id, Provider } from "ethers";
-import { AccountId } from "caip";
-import { AssetArtifact, caip, chain, OiContractHandler } from "@openibex/chain";
+import { Contract, Provider } from "ethers";
+import { OiContractHandler } from "@openibex/chain";
 import {getWallet } from "@openibex/chain";
-import plugin from "../plugin";
-
+import { WithPluginServices } from "@openibex/core";
 /**
  * Contract factory.
  */
+@WithPluginServices('openibex.chain/caip', 'openibex.chain/chain', 'openibex.chain/log')
 export class EthereumContractHandler extends OiContractHandler {
-
+  public log: any;
+  
   /**
    * Returns a contract based on a registered ABI as chain specific contract instance.
    * Default instance type for Ethereum is an ethers contract.
@@ -19,10 +19,9 @@ export class EthereumContractHandler extends OiContractHandler {
    * @returns Contract instance.
    */
   public async get(walletName?: string): Promise<Contract> {
-    const abiName = caip.getCAIPAssetType(this.assetArtifact).assetName.namespace;
-    const address = caip.getCAIPAssetType(this.assetArtifact).assetName.reference;
+    const address = this.caip.getCAIPAssetType(this.assetArtifact).assetName.reference;
   
-    const provider: Provider = await chain.provider(this.assetArtifact, 'default').get();
+    const provider: Provider = await this.chain.provider(this.assetArtifact, 'default').get();
   
     const contract = new Contract(address, this.abi, provider);
   
@@ -49,12 +48,12 @@ export class EthereumContractHandler extends OiContractHandler {
     filters?: any[]
   ) {
     const subscrId = this.getSubscriptionId(eventName, 'latest', filters);
-    plugin.log.info(`Subscribing to event ${eventName} contract ${this.assetArtifact.toString()}`);
+    this.log.info(`Subscribing to event ${eventName} contract ${this.assetArtifact.toString()}`);
 
     if (!(subscrId in this.subscriptions)) {
       const contract: Contract = await this.get();
       if (filters) {
-        plugin.log.info(`Setting filters for ${this.assetArtifact.toString()}`);
+        this.log.info(`Setting filters for ${this.assetArtifact.toString()}`);
         contract.filters[eventName](...filters);
       }
 

@@ -28,12 +28,12 @@
     "build": "npx lerna run --stream build",
     "test": "jest",
     "clean": "npx lerna run --stream clean",
-    "purge": "npx rimraf --glob node_modules dist data/orbitdb data/ipfs logs/ packages/**/node_modules src/**/dist",
+    "purge": "npx rimraf --glob node_modules dist data/orbitdb data/ipfs data/identities logs/ packages/**/node_modules src/**/dist",
     "oi": "tsx --watch packages/cli/src/index.ts"
   },
   "workspaces": [
-    "packages/**/*",
-    "examples/**/*",
+    "packages/*",
+    "examples/*",
     "e2e-tests"
   ],
   "devDependencies": {

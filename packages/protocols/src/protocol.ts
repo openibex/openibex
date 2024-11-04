@@ -1,5 +1,5 @@
-import { OiDataConsumer } from "@openibex/core";
-import { AssetArtifact, chain, OiContractAPI} from "@openibex/chain";
+import { OiDataConsumer, WithPluginServices } from "@openibex/core";
+import { AssetArtifact, OiChain, OiContractAPI} from "@openibex/chain";
 import { OiChainScraper } from "./scraper";
 
 export type AssetArtifactWithBlock = {
@@ -17,7 +17,9 @@ export type ProtocolMap = Record<string, Record<string, string>>;
  * - If it's started with a subset of addresses, only that subset is subscribed to.
  * - If a database is not found (because there's no scraper in the ecosystem) the protocol logs an error.
  */
+@WithPluginServices('openibex.chain/chain')
 export class OiChainProtocol {
+  public chain: OiChain;
   /**
    * Asset artifacts your protocol contains, and their startblocks.
    * Overwrite this in the inherited class.
@@ -91,7 +93,7 @@ export class OiChainProtocol {
    */
   public async getAPI(assetArtifact: AssetArtifact, walletName?: string): Promise<OiContractAPI> {
     //TODO: assetArtifacts needs to be in the artifact list.
-    return await chain.contract(assetArtifact).getAPI(walletName);
+    return await this.chain.contract(assetArtifact).getAPI(walletName);
   }
 
   /**

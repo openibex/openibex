@@ -2,6 +2,7 @@ import { AssetArtifact, OiContractConnector, OiContractConnectorParams  } from "
 import { AccountId } from "caip";
 import { EventLog } from "ethers";
 import { EthereumEventIndexer } from "../chain";
+import { WithPluginServices } from "@openibex/core";
 
 /**
  * The OiErc20Connector is listening to the standard events of ERC20 and creates a few producers:

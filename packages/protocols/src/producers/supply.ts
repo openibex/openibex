@@ -1,6 +1,5 @@
-import { OiNKeyValue } from "@openibex/core";
-import { AssetArtifact, OiChainLogProducer, getBurnAddress, getMintAddress, tagResolver } from "@openibex/chain";
-import { plugin, pluginName, pluginNamespace } from "../plugin";
+import { OiNKeyValue, WithPluginServices } from "@openibex/core";
+import { AssetArtifact, OiChain, OiChainLogProducer } from "@openibex/chain";
 
 /**
  * The state of supply (mints, burns, total) in that block.
@@ -14,7 +13,10 @@ import { plugin, pluginName, pluginNamespace } from "../plugin";
  */
 export type TokenSupplyRecord = [number, any, any, number, any, any, number];
 
+@WithPluginServices('openibex.chain/resolver', 'openibex.protocols/db', 'openibex.chain/chain')
 export class OiChainTokenSupplyProducer extends OiChainLogProducer {
+  public db: any;
+  public chain: OiChain;
 
   private burnAddrTag: string = '';
   private mintAddrTag: string = '';
@@ -41,17 +43,17 @@ export class OiChainTokenSupplyProducer extends OiChainLogProducer {
    * @param startBlock Startblock
    * @param bloomFilter Bloom Filter
    * @param namespace Plugin namespace
-   * @param plugin Plugin name
+   * @param pluginName Plugin name
    */
-  constructor(assetArtifact: AssetArtifact, tag: string, namespace = pluginNamespace, plugin = pluginName) {
-    super(assetArtifact, `supply-${tag}`, namespace, plugin);
+  constructor(assetArtifact: AssetArtifact, tag: string, namespace: string, pluginName: string) {
+    super(assetArtifact, `supply-${tag}`, namespace, pluginName);
   }
 
   public async init() {
-    this.burnAddrTag = tagResolver.tagCaipArtifact(getBurnAddress(this.assetArtifact)) as string;
-    this.mintAddrTag = tagResolver.tagCaipArtifact(getMintAddress(this.assetArtifact)) as string;
+    this.burnAddrTag = this.resolver.tagCaipArtifact(this.chain.provider(this.assetArtifact).getBurnAddress()) as string;
+    this.mintAddrTag = this.resolver.tagCaipArtifact(this.chain.provider(this.assetArtifact).getBurnAddress()) as string;
 
-    this.supplyDb = await plugin.db.getDB(1, 'oinkeyvalue', 'supply', this.assetArtifactTag) as OiNKeyValue<TokenSupplyRecord>; 
+    this.supplyDb = await this.db.getDB(1, 'oinkeyvalue', 'supply', this.assetArtifactTag) as OiNKeyValue<TokenSupplyRecord>; 
   }
 
   /**
@@ -91,14 +93,10 @@ export class OiChainTokenSupplyProducer extends OiChainLogProducer {
       return;
     }
 
-    plugin.log.info(`Logging block ${this.currentBlock} at block no ${this.currentBlock}`);
     await this.supplyDb.put(
       this.currentBlock,
       [this.mintAmount, this.currentMintTree, this.allMintsTrie, this.burnAmount, this.currentBurnTree, this.allBurnsTrie, this.supplyAmount]
     );
-
-    plugin.log.info(`Logged supply data for ${this.assetArtifact.toString()} on block ${this.currentBlock}.`);
-    plugin.log.info(`Total minted: ${this.mintAmount}, Total Burned: ${this.burnAmount}, current supply: ${this.supplyAmount}.`);
 
     this.mintAmount, this.burnAmount = 0n;
     this.mintCount, this.burnCount = 0;

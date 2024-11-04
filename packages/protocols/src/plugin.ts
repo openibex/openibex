@@ -1,19 +1,19 @@
-import { registerOiPlugin, OiPlugin } from "@openibex/core";
+import { OiPlugin, RegisterPlugin } from "@openibex/core";
 import { OiChainProtocols } from "./protocols";
 
-export const pluginName = 'protocols';
-export const pluginNamespace = 'openibex';
-
 // Plugin Config with defaults. Merged on init with config from core.
-const pluginDefaultConfig = {};
+const pluginDefaultConfig = {
+  wallets: {},
+  networks: {}
+};
 
-export let protocols!: OiChainProtocols;
+@RegisterPlugin()
+export default class OiProtocolsPlugin extends OiPlugin {}
 
-export let plugin: OiPlugin = new OiPlugin(pluginName, pluginNamespace, pluginDefaultConfig);
-
-plugin.onInit('exporting protocol', async (plugin: OiPlugin) => {
-  protocols = plugin.getPluginService('protocols') as OiChainProtocols;
+new OiProtocolsPlugin('openibex', 'protocols', {
+  config: pluginDefaultConfig,
+  dependencies: ['openibex.chain'],
+  services: {
+    "protocols": new OiChainProtocols()
+  }
 });
-
-// Register the plugin
-registerOiPlugin(pluginName, pluginNamespace, plugin, ['openibex.chain', 'openibex.core', 'openibex.ethereum']);

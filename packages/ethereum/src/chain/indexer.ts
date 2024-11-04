@@ -1,12 +1,11 @@
-import { AssetArtifact, OiEventIndexer, chain } from "@openibex/chain";
-import plugin from "../plugin";
+import { AssetArtifact, OiEventIndexer } from "@openibex/chain";
 import { Contract, EventLog, ContractEventPayload } from "ethers";
-import { OiRateLimiter } from "@openibex/chain";
 
 /**
  * Ethereum-specific indexer using ethers.
  */
 export class EthereumEventIndexer extends OiEventIndexer{
+
   private importer!: Contract;
   private importFilter: any;
 
@@ -27,7 +26,7 @@ export class EthereumEventIndexer extends OiEventIndexer{
    * Called internally.
    */
   protected async subscribe() {
-    await chain.contract(this.assetArtifact).subscribe(this.eventName, async (...args: any) => { await this.processEvent(...args); }, this.bloomFilters);
+    await this.chain.contract(this.assetArtifact).subscribe(this.eventName, async (...args: any) => { await this.processEvent(...args); }, this.bloomFilters);
   }
 
   /**
@@ -39,14 +38,14 @@ export class EthereumEventIndexer extends OiEventIndexer{
    */
   protected async importBatch(startBlock: number, endBlock: number): Promise<any[]> {
     if(!this.importer) {
-      this.importer = await chain.contract(this.assetArtifact).get();
+      this.importer = await this.chain.contract(this.assetArtifact).get();
       this.importFilter = this.eventName;
       
       if (this.importFilter !== '*' && this.bloomFilters && this.bloomFilters.length > 0)
         this.importFilter = this.importer.filters[this.eventName](...this.bloomFilters);
     }
 
-    const rateLimiter = chain.provider(this.assetArtifact).getRateLimiter();
+    const rateLimiter = this.chain.provider(this.assetArtifact).getRateLimiter();
     return rateLimiter.execute(() => this.importer.queryFilter(this.importFilter, startBlock, endBlock));
   }
 
@@ -66,11 +65,11 @@ export class EthereumEventIndexer extends OiEventIndexer{
     } else if (event instanceof EventLog) {
       sendEvent = event;
     } else {
-      plugin.log.error(`An Event in unknown format was retrieved`);
+      this.log.error(`An Event in unknown format was retrieved`);
       return
     }
     if(!sendEvent) {
-      plugin.log.error(`No event found.`);
+      this.log.error(`No event found.`);
       return;
     }
 

@@ -1,6 +1,6 @@
-import { OiContractConnector, chain } from "@openibex/chain";
-import { plugin } from "./plugin";
+import { OiChain, OiContractConnector } from "@openibex/chain";
 import { AssetArtifactWithBlock, ProtocolMap } from "./protocol";
+import { WithPluginServices } from "@openibex/core";
 
 /**
  * A scraper collects all data required for a protocol to operate. It orchestrates
@@ -12,7 +12,11 @@ import { AssetArtifactWithBlock, ProtocolMap } from "./protocol";
  * This includes contracts that do not only reside on EVM but as well others.
  * 
  */
+@WithPluginServices('openibex.chain/chain', 'openibex.chain/log')
 export class OiChainScraper {
+  public chain: OiChain;
+  public log: any;
+  
   protected assetArtifacts: AssetArtifactWithBlock[] = [];
   protected connectors: OiContractConnector[] = [];
   protected bloomFilter: string[][]
@@ -28,9 +32,9 @@ export class OiChainScraper {
   public constructor(assetArtifacts: AssetArtifactWithBlock[], protocolMap: ProtocolMap, bloomFilter?: string[][], params?: any) {
     for( const artifact of assetArtifacts) {
       try {
-        chain.provider(artifact.assetArtifact);
+        this.chain.provider(artifact.assetArtifact);
       } catch {
-        plugin.log.warn(`Cant scrape ${artifact.assetArtifact.toString()} - Chain or platform not supported.`);
+        this.log.warn(`Cant scrape ${artifact.assetArtifact.toString()} - Chain or platform not supported.`);
         continue;
       }
 
@@ -50,11 +54,11 @@ export class OiChainScraper {
 
       for(const setName in this.protocolMap) {
         if(!this.protocolMap[setName][namespace]) {
-          plugin.log.warn(`Protocol does not support ${setName} on ${namespace}.`);
+          this.log.warn(`Protocol does not support ${setName} on ${namespace}.`);
           continue;
         }
         const connectorName = this.protocolMap[setName][namespace];
-        this.connectors.push(await chain.contract(artifact.assetArtifact).getConnector({startBlock: artifact.startBlock}, this.bloomFilter, connectorName));
+        this.connectors.push(await this.chain.contract(artifact.assetArtifact).getConnector({startBlock: artifact.startBlock}, this.bloomFilter, connectorName));
       } 
     }));
 
