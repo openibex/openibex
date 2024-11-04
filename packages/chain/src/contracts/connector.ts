@@ -1,6 +1,7 @@
+import { WithPluginServices } from "@openibex/core";
 import { AssetArtifact, ChainArtifact } from "../caip";
-import { tagResolver } from "../plugin";
 import { OiChainLogProducer } from "../producers/chainlog";
+import { OiAddressTagResolver } from "../resolver";
 import { OiEventIndexer } from "./indexer";
 
 export type OiContractConnectorParams = {
@@ -14,7 +15,10 @@ export type OiContractConnectorParams = {
  * Connectors orchestrate the indexer and the producers of a smart contract.
  * 
  */
+@WithPluginServices('openibex.chain/resolver')
 export class OiContractConnector {
+  public resolver: OiAddressTagResolver;
+
   protected assetNamespace: string;
   protected caipNamespace: string;
   protected assetArtifact: AssetArtifact;
@@ -180,9 +184,9 @@ export class OiContractConnector {
     for (const artifact of artifacts) {
       // If resolve is true, call addCaipArtifact and wait for it to complete
       if (this.resolve) {
-        tags.push(await tagResolver.addCaipTagResolver(artifact) as string);
+        tags.push(await this.resolver.addCaipTagResolver(artifact) as string);
       } else {
-        tags.push(tagResolver.tagCaipArtifact(artifact) as string);
+        tags.push(this.resolver.tagCaipArtifact(artifact) as string);
       }
     }
 

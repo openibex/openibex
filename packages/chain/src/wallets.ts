@@ -1,8 +1,12 @@
 import { Wallet, HDNodeWallet } from "ethers";
-import { type AssetArtifact, ChainArtifact } from "./caip";
-import { plugin, caip } from "./plugin";
+import { type AssetArtifact, ChainArtifact, OiCaipHelper } from "./caip";
 import * as fs from 'fs';
 import { AccountId } from "caip";
+import { oiCorePlugins } from "@openibex/core";
+import OiChainPlugin from "./plugin";
+
+const plugin: OiChainPlugin = oiCorePlugins.getPlugin('openibex', 'chain');
+const caip: OiCaipHelper = plugin.getService('caip');
 
 interface WalletsList {
   [chainId: string]: {

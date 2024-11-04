@@ -1,6 +1,8 @@
 import { Contract, AbiCoder, ethers, FunctionFragment } from "ethers";
 import type { AssetArtifact } from "../caip";
-import { chain } from '../plugin';
+import { WithPluginServices } from "@openibex/core";
+import { OiChain } from "../chain";
+
 
 /**
  * OiApi is a smart contract API wrapper, that wraps API functions in a chain-agnostic
@@ -8,7 +10,9 @@ import { chain } from '../plugin';
  * 
  * It can use on-chain data as well as off-chain OrbitDB databases and producers / consumers.
  */
+@WithPluginServices('openibex.chain/chain')
 export class OiContractAPI {
+  public chain: OiChain;
 
   public contract: Promise<Contract>;
   public walletName: any;
@@ -22,7 +26,7 @@ export class OiContractAPI {
   constructor(assetArtifact: AssetArtifact, walletName?: string) {
     this.walletName = walletName;
     this.assetArtifact = assetArtifact;
-    this.contract = chain.contract(assetArtifact).get(walletName);
+    this.contract = this.chain.contract(assetArtifact).get(walletName);
   }
 
   public getRawContract(): Promise<Contract> {

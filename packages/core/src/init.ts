@@ -1,5 +1,5 @@
 import { KeyValue } from "@orbitdb/core";
-import { OiConfig } from "./core.config";
+import { OiConfig } from "./config";
 import { startNode } from "./node";
 import { openDatabase } from "./db";
 import { getOiCore } from "./index";

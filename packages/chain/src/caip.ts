@@ -1,6 +1,5 @@
 import { OiPluginService } from "@openibex/core";
 import { ChainId, AccountId, AssetId, AssetType } from "caip";
-import { plugin } from "./plugin";
 
 /**
  * Any CAIP object can be a ChainArtifact.
@@ -21,7 +20,7 @@ export type AccountArtifact = AccountId;
  * This submodule manages CAIP-19 formatting of addresses.
  */
 export class OiCaipHelper extends OiPluginService {
-
+  
   /**
    * Type Guard for Chain Ids.Returns true if object is an ChainId.
    * 
@@ -134,5 +133,3 @@ export class OiCaipHelper extends OiPluginService {
     throw new Error(`Invalid CAIP input ${caipInput}`);
   }
 }
-
-plugin.addPluginService('caip', new OiCaipHelper);

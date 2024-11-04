@@ -27,13 +27,14 @@ export type OiCoreSchema = {
  * the first call to getOiCore() plugins are initialized.
  */
 export class OiPlugin {
-  private isInitialized: boolean = false;
+  protected isInitialized: boolean = false;
 
   public name: string;
   public namespace: string;
   public conf: any = {};
+  public dependencies: string[] = []
 
-  protected initFragments: Record< string, (plugin: OiPlugin) => Promise<void>> = {};
+  protected initHooks: Record< string, (plugin: OiPlugin) => Promise<void>> = {};
   protected pluginServices: Record< string, OiPluginService> = {};
 
   public log!: OiLoggerInterface;
@@ -45,13 +46,19 @@ export class OiPlugin {
    * 
    * @param pluginName Name of the plugin.
    * @param pluginNamespace Namespace of the plugin.
+   * @param setup Plugin configuration.
    */
-  constructor(pluginName: string, pluginNamespace: string, defaultConfig: any){
+  constructor(pluginNamespace: string, pluginName: string, setup: {config?: any, dependencies?: string[], services?: Record<string, OiPluginService>}){
     this.name = pluginName;
     this.namespace = pluginNamespace;
-    this.conf = defaultConfig;
-  }
+    this.conf = setup.config ? setup.config : {};
+    this.dependencies = setup.dependencies ? setup.dependencies : [];
 
+    for(const serviceName of Object.keys(setup.services)) {
+      this.pluginServices[serviceName] = setup.services[serviceName];
+    }
+  }
+  
   /**
    * Adds an init callback which is executed in the init function. Init callbacks
    * are used by TypeScript modules within the plugin to initialize databases,
@@ -61,15 +68,15 @@ export class OiPlugin {
    * @param callback The init callback.
    */
   public onInit(name: string, callback: (plugin: OiPlugin) => Promise<void>) {
-    this.initFragments[name] = callback;
-
     if(this.isInitialized) {
-      this.initFragments[name](this);
+      throw Error(`Plugin ${this.namespace}.${this.name} is already initialized cant add hook ${name}`)
     }
+
+    this.initHooks[name] = callback;
   }
   
   /**
-   * Plugin initialization. Sets logger, coreDB and calls all initFragments.
+   * Plugin initialization. Sets logger, coreDB and calls all initHooks.
    * 
    * @param config Application config object.
    * @param coreDB Core database
@@ -93,21 +100,21 @@ export class OiPlugin {
 
     await Promise.all(promises);
 
-    promises = Object.keys(this.initFragments).map((fragName) => {
-      this.log.info(`Plugin ${this.namespace}.${this.name} initializing fragment ${fragName}.`);
-      return this.initFragments[fragName](this);
+    promises = Object.keys(this.initHooks).map((fragName) => {
+      this.log.info(`Plugin ${this.namespace}.${this.name} running hook ${fragName}.`);
+      return this.initHooks[fragName](this);
     });
     await Promise.all(promises);
   }
 
-  public addPluginService(name: string, serviceInstance: OiPluginService) {
+  public addService<T extends OiPluginService>(name: string, serviceInstance: T) {
     this.pluginServices[name] = serviceInstance;
   }
 
-  public getPluginService(name?: string): OiPluginService {
+  public getService<T extends OiPluginService>(name?: string): T {
     if(!name) name = this.name;
     if(!this.pluginServices[name]) throw Error(`Service ${name} not found in ${this.namespace}.${this.name}`);
 
-    return this.pluginServices[name];
+    return this.pluginServices[name] as unknown as T;
   }
 }

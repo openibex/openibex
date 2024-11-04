@@ -1,6 +1,10 @@
 import { AccountId } from "caip";
-import { ChainArtifact } from "./caip";
-import { caip } from './plugin';
+import { ChainArtifact, OiCaipHelper } from "./caip";
+import { oiCorePlugins } from "@openibex/core";
+import OiChainPlugin from "./plugin";
+
+const plugin: OiChainPlugin = oiCorePlugins.getPlugin('openibex', 'chain');
+const caip: OiCaipHelper = plugin.getService('caip');
 
 export function getMintAddress(chainArtifact: ChainArtifact) {
   const chainId = caip.getCAIPChain(chainArtifact);

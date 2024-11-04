@@ -1,15 +1,15 @@
+import './plugin';
+
 export type {ChainArtifact, AssetArtifact, AccountArtifact} from './caip';
 export { OiCaipHelper } from './caip';
 export { OiAddressTagResolver } from './resolver';
 export { OiChain } from './chain';
-
-export { chain, caip, tagResolver } from './plugin';
+export { OiChainRegister } from './register';
 
 export { OiProviderHandler, OiProvidersList, OiRateLimiter } from './providers';
-export { OiContractHandler, OiContractConnector, type OiContractConnectorParams, OiContractAPI, OiEventIndexer } from './contracts';
+export { OiContractHandler, OiContractConnector, type OiContractConnectorParams, OiContractAPI, OiEventIndexer, OiContractRegister } from './contracts';
 export { OiBlockHandler } from './blocks';
 
-export { getBurnAddress, getMintAddress } from './utils';
 export { OiChainLogProducer } from './producers/chainlog';
 export { OiChainLogConsumer } from './consumers/chainlog';
 
@@ -17,7 +17,3 @@ export { OiChainLogConsumer } from './consumers/chainlog';
 // initWallets shall be done internally in this file
 // remove export!
 export { initWallets, getWallet } from './wallets'
-
-// Register the plugin.
-import './plugin';
-

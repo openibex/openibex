@@ -4,7 +4,7 @@ import { createLibp2p, Libp2p } from "libp2p";
 import { MemoryBlockstore } from "blockstore-core";
 import { LevelBlockstore } from "blockstore-level";
 import { OrbitDB } from "@orbitdb/core";
-import { OiConfigHelia } from "../core.config";
+import { OiConfigHelia } from "../config";
 import { NodeLibp2pConfig } from './libp2p';
 import { getOrbitDB, initOrbitDB, isDBReady, stopDatabase } from '../db';
 import { monitorPeers } from "./peers";

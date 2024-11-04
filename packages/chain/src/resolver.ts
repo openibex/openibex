@@ -1,11 +1,11 @@
 import { OiKeyValueExtended, OiPlugin, OiPluginService } from "@openibex/core";
-import { AssetArtifact, ChainArtifact } from "./caip";
-
-import { caip, plugin } from "./plugin";
+import { AssetArtifact, ChainArtifact, OiCaipHelper } from "./caip";
 import { createHash } from "crypto";
 
 
 export class OiAddressTagResolver extends OiPluginService {
+  private caip: OiCaipHelper;
+
   /**
    * Resolver creates unique id's, known as tags, out of CAIP types. This saves storage amongst the databases
    * and grants pseudoanonymity.
@@ -14,6 +14,7 @@ export class OiAddressTagResolver extends OiPluginService {
 
   public async init(plugin: OiPlugin) : Promise<void> {
     this.resolverDB = await plugin.db.getDB(1, 'oikeyvalue-extended', 'resolver') as unknown as OiKeyValueExtended<Uint8Array>;
+    this.caip = plugin.getService('caip');
   };
 
   /**
@@ -56,9 +57,6 @@ export class OiAddressTagResolver extends OiPluginService {
     }
     // FIXME @Lukas: Argument of type 'Uint8Array' is not assignable to parameter of type 'string'.
     // @ts-ignore
-    return caip.caipFactory(caipStr);
+    return this.caip.caipFactory(caipStr);
   }
-
 }
-
-plugin.addPluginService('resolver', new OiAddressTagResolver);

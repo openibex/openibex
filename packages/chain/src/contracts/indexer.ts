@@ -1,6 +1,6 @@
-import { OiNKeyValue, getNodeId } from "@openibex/core";
-import { chain, plugin } from "../plugin";
+import { OiNKeyValue, WithPluginServices, getNodeId } from "@openibex/core";
 import { AssetArtifact } from "../caip";
+import { OiChain } from "../chain";
 
 /**
  * Generic indexer class. All other indexers are inherited from this class.
@@ -14,8 +14,13 @@ import { AssetArtifact } from "../caip";
  * 
  * For a practical example check the ethereum package.
  */
+@WithPluginServices('openibex.chain/chain', 'openibex.chain/log', 'openibex.chain/db')
 export class OiEventIndexer{
-  protected subscriptionId: string;
+  public chain: OiChain;
+  public log: any;
+  public db: any;
+
+  protected subscriptionId!: string;
   protected assetArtifact: AssetArtifact;
   protected eventName: string = '*';
   protected startBlock: number | string;
@@ -37,7 +42,6 @@ export class OiEventIndexer{
    * @param bloomFilters Filters for import.
    */
   public constructor(assetArtifact: AssetArtifact, eventName: string, startBlock: number | string, bloomFilters?: any) {
-    this.subscriptionId = chain.contract(assetArtifact).getSubscriptionId( eventName, startBlock, bloomFilters)
     this.assetArtifact = assetArtifact;
     this.eventName = eventName;
     this.startBlock = startBlock;
@@ -53,7 +57,7 @@ export class OiEventIndexer{
   public async init(eventProcessor: (...args: any[]) => Promise<void>, onBlockComplete: (event: string, block: number) => Promise<void> ) {
     this.processorCallback = eventProcessor;
     this.onBlockCompleteCallback = onBlockComplete;
-    this.processedDB = await plugin.db.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
+    this.processedDB = await this.db.getDB(1, 'oinkeyvalue', 'indexer.processor', this.subscriptionId) as OiNKeyValue<string>;
 
     // Track peers that connect to this database, hence run indexers as well.
     // FIXME @Lukas Argument of type '(peerId: any, heads: any) => Promise<void>' is not assignable to parameter of type 'never'.
@@ -81,7 +85,7 @@ export class OiEventIndexer{
    * @returns SubscriptionId of the indexer
    */
   public getSubscriptionId() {
-    return this.subscriptionId;
+    return this.chain.contract(this.assetArtifact).getSubscriptionId( this.eventName, this.startBlock, this.bloomFilters)
   }
 
   /**
@@ -124,13 +128,13 @@ export class OiEventIndexer{
    */
   protected async import(fromBlock: number) {
     let lastBlock: number = fromBlock - 1;
-    const batchSize: number = chain.provider(this.assetArtifact).getSetting('batchSize');
+    const batchSize: number = this.chain.provider(this.assetArtifact).getSetting('batchSize');
     
-    for (let startBlock = fromBlock; startBlock <= await chain.blocks(this.assetArtifact).latest(this.assetArtifact); startBlock += batchSize) {
-      const endBlock = Math.min(startBlock + batchSize - 1, await chain.blocks(this.assetArtifact).latest(this.assetArtifact));
+    for (let startBlock = fromBlock; startBlock <= await this.chain.blocks(this.assetArtifact).latest(this.assetArtifact); startBlock += batchSize) {
+      const endBlock = Math.min(startBlock + batchSize - 1, await this.chain.blocks(this.assetArtifact).latest(this.assetArtifact));
       const events = await this.importBatch(startBlock, endBlock);
   
-      plugin.log.info(`Found ${events.length} events for ${this.assetArtifact} in blocks ${startBlock} to ${endBlock}`);
+      this.log.info(`Found ${events.length} events for ${this.assetArtifact} in blocks ${startBlock} to ${endBlock}`);
 
       if(events.length == 0) {
         lastBlock = endBlock;

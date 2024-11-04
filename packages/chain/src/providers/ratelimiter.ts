@@ -1,6 +1,3 @@
-import { ChainArtifact } from '../caip';
-import { caip, pluginConfig } from '../plugin';
-
 /**
  * Rate limiters are initiated once per network. They're intended to limit heavy
  * requests like eth_getLog. 

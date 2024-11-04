@@ -1,9 +1,8 @@
-import { type AssetArtifact, type ChainArtifact } from "./caip";
-import { OiPluginService } from "@openibex/core";
+import { OiCaipHelper, type AssetArtifact, type ChainArtifact } from "./caip";
+import { OiPlugin, OiPluginService } from "@openibex/core";
 import { OiContractAPI, OiContractConnector, OiContractHandler } from "./contracts";
 import { OiBlockHandler } from "./blocks";
 import { OiProviderHandler, OiProvidersList } from "./providers";
-import { caip, plugin } from './plugin';
 
 /**
  * OiChain provides access to all chain resources (scrapers, protocols, APIs, accounts, blocks and transactions)
@@ -13,10 +12,13 @@ import { caip, plugin } from './plugin';
  * 
  */
 export class OiChain extends OiPluginService {
+  public caip: OiCaipHelper;
+  public log: any;
+
   /**
    * Keeps an instance of every platforms provider handler.
    */
-  private providerHandler: Record<string, typeof OiProviderHandler> = {};
+  private providerHandlers: Record<string, typeof OiProviderHandler> = {};
   
   /**
    * Singleton for provider handlers
@@ -26,12 +28,12 @@ export class OiChain extends OiPluginService {
   /**
    * Keeps an instance of every platforms contract handler / abi-management.
    */
-  private blockHandler: Record<string, typeof OiBlockHandler> = {};
+  private blockHandlers: Record<string, typeof OiBlockHandler> = {};
 
   /**
    * Keeps an instance of every platforms contract handler / abi-management.
    */
-  private contractHandler: Record<string, typeof OiContractHandler> = {};
+  private contractHandlers: Record<string, typeof OiContractHandler> = {};
 
   /**
    * Contract register: Contains all the required info to launch a contract handler.
@@ -45,12 +47,12 @@ export class OiChain extends OiPluginService {
    * @returns 
    */
   public provider(chainArtifact: ChainArtifact, providerName: string = 'default'): OiProviderHandler {
-    const platform = caip.getCAIPChain(chainArtifact).namespace;
-    const chain = caip.getCAIPChain(chainArtifact).toString();
+    const platform = this.caip.getCAIPChain(chainArtifact).namespace;
+    const chain = this.caip.getCAIPChain(chainArtifact).toString();
 
     if(!this.providerInstances[chain]) this.providerInstances[chain] = {}
     if(!this.providerInstances[chain][providerName]) {
-      const handler = new this.providerHandler[platform](chainArtifact);
+      const handler = new this.providerHandlers[platform](chainArtifact);
       if (!handler) throw new Error(`Contracts are not supported on platform ${platform}.`);
       this.providerInstances[chain][providerName]= handler;
     }
@@ -66,9 +68,9 @@ export class OiChain extends OiPluginService {
   public blocks(chainArtifact: ChainArtifact): OiBlockHandler {
     const platform = typeof chainArtifact === 'string'
         ? chainArtifact
-        : caip.getCAIPChain(chainArtifact).namespace;
+        : this.caip.getCAIPChain(chainArtifact).namespace;
 
-    const handler = new this.blockHandler[platform](chainArtifact);
+    const handler = new this.blockHandlers[platform](chainArtifact);
 
     if (!handler) throw new Error(`Contracts are not supported on platform ${platform}.`);
 
@@ -81,14 +83,13 @@ export class OiChain extends OiPluginService {
    * @param assetArtifact Any type of asset artifact.
    */
   public contract(assetArtifact: AssetArtifact, abiName?:string): OiContractHandler {
-    const platform = caip.getCAIPChain(assetArtifact).namespace;
+    const platform = this.caip.getCAIPChain(assetArtifact).namespace;
     const name = abiName ? abiName : assetArtifact.assetName.namespace
 
+    if(!this.contractHandlers[platform]) throw new Error(`Contracts are not supported on platform ${platform}.`);
     if(!this.contractRegister[platform][name]) throw new Error(`No contract ${name} registered for ${platform}`);
     
-    const handler = new this.contractHandler[platform](assetArtifact, this.contractRegister[platform][name]);
-
-    if (!handler) throw new Error(`Contracts are not supported on platform ${platform}.`);
+    const handler = new this.contractHandlers[platform](assetArtifact, this.contractRegister[platform][name]);
 
     return handler;
   }
@@ -105,9 +106,9 @@ export class OiChain extends OiPluginService {
     // utilsHandler: OiUtilsHandler,
     // indexer: OiEventIndexer,
    ) {
-    this.providerHandler[caipPlatform] = providerHandler;
-    this.contractHandler[caipPlatform] = contractHandler;
-    this.blockHandler[caipPlatform] = blockHandler;
+    this.providerHandlers[caipPlatform] = providerHandler;
+    this.contractHandlers[caipPlatform] = contractHandler;
+    this.blockHandlers[caipPlatform] = blockHandler;
   }
 
   /**
@@ -134,12 +135,15 @@ export class OiChain extends OiPluginService {
       connector: connector
     }
 
-    plugin.log.info(`Registered contract ${caipAssetNamespace} on platform ${caipPlatform}`);
+    this.log.info(`Registered contract ${caipAssetNamespace} on platform ${caipPlatform}`);
   }
 
-  public async init() {
-
+  /**
+   * Service initializer
+   * @param plugin 
+   */
+  public async init(plugin: OiPlugin) {
+    this.log = plugin.log;
+    this.caip = plugin.getService('caip');
   }
 }
-
-plugin.addPluginService('chain', new OiChain());

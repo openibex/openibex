@@ -1,13 +1,26 @@
 import { ChainId } from "caip";
-import type { ChainArtifact } from "./caip";
-import { caip } from "./plugin";
+import type { ChainArtifact, OiCaipHelper } from "./caip";
+import { WithPluginServices } from "@openibex/core";
 
+@WithPluginServices('openibex.chain/caip')
 export class OiBlockHandler {
-  protected chainId: ChainId;
+  public caip: OiCaipHelper;
+  
+  protected chainArtifact: ChainArtifact;
 
   constructor(chainArtifact: ChainArtifact) {
-    this.chainId = caip.getCAIPChain(chainArtifact);
+    this.chainArtifact = chainArtifact;
   }
+
+  /**
+   * Returns the chainId object of this provider.
+   * 
+   * @returns 
+   */
+  public getChainId(): ChainId {
+    return this.caip.getCAIPChain(this.chainArtifact);
+  }
+  
   /**
    * Register a callback to receive the latest blocknumber.
    * Ethereum: The block numbers are drawn from the provider keepalive without additional RPC-Requests

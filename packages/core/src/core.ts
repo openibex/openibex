@@ -1,7 +1,7 @@
 import { KeyValue } from "@orbitdb/core";
 
-import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./core.config";
-import { getPlugin, initPlugins, OiPlugin, OiPluginService, registerOiPlugin, type OiCoreSchema } from "./plugins";
+import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./config";
+import { oiCorePlugins, type OiCoreSchema } from "./plugins";
 import { OiDbManager, openDatabase, registerDatabaseTypes } from "./db";
 
 /**
@@ -87,12 +87,10 @@ async function initOiCore(config: OiConfig, logger: OiLoggerInterface): Promise<
 
   core = new OiCore(config);
 
-  // the core is a plugin itself, register it
-  registerOiPlugin('core', 'openibex', core, []);
-
   const coreDB = await openDatabase(config.database.address, 'keyvalue') as unknown as KeyValue<OiCoreSchema>;
+  await core.init(coreDB, logger);
   
-  await initPlugins(config, coreDB, logger);
+  await oiCorePlugins.initPlugins(config, coreDB, logger);
 }
 
 class BaseLogger implements OiLoggerInterface {
@@ -123,13 +121,18 @@ class BaseLogger implements OiLoggerInterface {
 /**
  * The core application class. The core stores settings, administers databases and producers.
  */
-export class OiCore extends OiPlugin {
+export class OiCore {
+  private namespace: 'openibex';
+  private name: 'core';
+
   private dbConf: OiConfigDatabase;
   private heliaConf: OiConfigHelia;
   private pluginConf: any;
 
   private appDbManager!: OiDbManager;
   private valuesDB!: KeyValue<any>
+  public log!: OiLoggerInterface;
+
   /**
    * Construtor for OiCore
    * 
@@ -137,8 +140,6 @@ export class OiCore extends OiPlugin {
    * @param logger A logger object.
    */
   constructor(config: OiConfig) {
-    super('core', 'openibex', {});
-
     this.dbConf = config.database;
     this.heliaConf = config.helia;
     this.pluginConf = config.plugins;
@@ -151,20 +152,10 @@ export class OiCore extends OiPlugin {
    * @param coreDB Core database
    * @param logger 
    */
-  public async init(config: any, coreDB: KeyValue<OiCoreSchema>, logger: any): Promise<void> {
-    super.init(config, coreDB, logger);
-
+  public async init(coreDB: KeyValue<OiCoreSchema>, logger: any): Promise<void> {
+    this.log = logger;
     this.appDbManager = new OiDbManager(`${this.dbConf.namespace}`, logger, coreDB);
     this.valuesDB = await this.appDbManager.getDB(1, 'keyvalue', `values`) as unknown as KeyValue<any>;
-  }
-
-  public getPlugin(dottedPluginName: string): OiPlugin {
-    const [namespace, pluginName] = dottedPluginName.split('.');
-    return getPlugin(namespace, pluginName);
-  }
-
-  public async getService(dottedPluginName: string, serviceName?: string): Promise<OiPluginService> {
-    return this.getPlugin(dottedPluginName).getPluginService(serviceName);
   }
 
     /**
@@ -206,5 +197,17 @@ export class OiCore extends OiPlugin {
    */
   public async getDB(revision: number, type: string, name: string, tag?: string): Promise<any> {
     return await this.appDbManager.getDB(revision, type, name, tag);
+  }
+
+  /**
+   * Returns a plugin service. Shorthand abstraction of plugin registry.
+   * 
+   * @param pluginDottedName 
+   * @param serviceName 
+   * @returns 
+   */
+  public getService(pluginDottedName, serviceName) {
+    const [namespace, pluginName] = pluginDottedName.split('.');
+    return oiCorePlugins.getPlugin(namespace, pluginName).getService(serviceName);
   }
 }

@@ -1,18 +1,24 @@
 import { createHash } from "crypto";
 import { OiContractAPI } from "./api";
 import { OiContractConnector, OiContractConnectorParams } from "./connector";
-import { AssetArtifact } from "../caip";
+import { AssetArtifact, OiCaipHelper } from "../caip";
 import { AssetType } from "caip";
-import { caip, chain } from '../plugin';
+import { OiChain } from "../chain";
+import { WithPluginServices } from "@openibex/core";
+
+
 /**
  * Contract factory.
  */
+@WithPluginServices('openibex.chain/chain', 'openibex.chain/caip')
 export class OiContractHandler {
+  public chain: OiChain;
+  public caip: OiCaipHelper;
+
   /**
    * Asset covered by handler.
    */
   protected assetArtifact: AssetArtifact;
-  protected assetType: AssetType;
 
   /**
    * Contract artifacts
@@ -34,15 +40,17 @@ export class OiContractHandler {
    * 
    * @param assetArtifact Contract address in CAIP-19 notation.
    */
-  constructor(assetArtifact: AssetArtifact, config: {abi: any, api?: typeof OiContractAPI, connector?: typeof OiContractConnector}) {
+  constructor(assetArtifact: AssetArtifact, config: {abi?: any, api?: typeof OiContractAPI, connector?: typeof OiContractConnector}) {
     this.assetArtifact = assetArtifact;
-    this.assetType = caip.getCAIPAssetType(assetArtifact);
 
-    this.abi = config.abi;
+    this.abi = config?.abi;
     this.api = config?.api;
     this.connector = config?.connector;
   }
 
+  protected getAssetType(): AssetType {
+    return this.caip.getCAIPAssetType(this.assetArtifact);
+  }
   /**
    * Generates an unique id for address / filters used.
    * 
@@ -96,8 +104,9 @@ export class OiContractHandler {
    * @returns Contract instance.
    */
   public getAPI(walletName?: string, abiName?: string): OiContractAPI {
+    if(!abiName && !this.api) throw Error(`No API defined for ${this.getAssetType().toString()}`);
     return abiName ? 
-      chain.contract(this.assetArtifact, abiName).getAPI(walletName) 
+      this.chain.contract(this.assetArtifact, abiName).getAPI(walletName) 
       : new this.api(this.assetArtifact, walletName);
   }
 
@@ -111,8 +120,9 @@ export class OiContractHandler {
    * @returns Contract instance.
    */
   public getConnector(params: OiContractConnectorParams, bloomFilter?: string[][], connectorName?: string): OiContractConnector  {
+    if(!connectorName && !this.connector) throw Error(`No Connector defined for ${this.getAssetType().toString()}`);
     return connectorName ? 
-      chain.contract(this.assetArtifact, connectorName).getConnector(params, bloomFilter) 
+      this.chain.contract(this.assetArtifact, connectorName).getConnector(params, bloomFilter) 
       : new this.connector(this.assetArtifact, params, bloomFilter);
   }
 }
