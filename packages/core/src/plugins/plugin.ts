@@ -31,7 +31,7 @@ export class OiPlugin {
 
   public name: string;
   public namespace: string;
-  public conf: any = {};
+  public config: any = {};
   public dependencies: string[] = []
 
   protected initHooks: Record< string, (plugin: OiPlugin) => Promise<void>> = {};
@@ -51,7 +51,7 @@ export class OiPlugin {
   constructor(pluginNamespace: string, pluginName: string, setup: {config?: any, dependencies?: string[], services?: Record<string, OiPluginService>}){
     this.name = pluginName;
     this.namespace = pluginNamespace;
-    this.conf = setup.config ? setup.config : {};
+    this.config = setup.config ? setup.config : {};
     this.dependencies = setup.dependencies ? setup.dependencies : [];
 
     for(const serviceName of Object.keys(setup.services)) {
@@ -91,7 +91,7 @@ export class OiPlugin {
 
     this.log = logger;
     this.db = new OiDbManager(`${this.namespace}.${this.name}`, logger, coreDB);
-    this.conf = config;
+    this.config = config;
     
     let promises = Object.keys(this.pluginServices).map( (serviceName) => { 
       this.log.info(`Plugin ${this.namespace}.${this.name} initializing service ${serviceName}.`);

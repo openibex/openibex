@@ -87,7 +87,8 @@ export function WithPluginServices(...serviceIdentifiers: string[]) {
 
           const serviceMap: Record<string, any> = {
             db: plugin.db,
-            log: plugin.log
+            log: plugin.log,
+            config: plugin.config
           };
           
           const service = serviceMap[serviceName] ?? plugin.getService(serviceName);
