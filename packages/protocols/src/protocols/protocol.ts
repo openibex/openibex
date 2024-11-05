@@ -20,6 +20,22 @@ export type ProtocolMap = Record<string, Record<string, string>>;
 @WithPluginServices('openibex.chain/chain')
 export class OiChainProtocol {
   public chain: OiChain;
+
+  /**
+   * Protocol handle
+   */
+  public handle: string;
+
+  /**
+   * On which platforms the protocol is deployed.
+   */
+  public handlePlatforms: string[];
+
+  /**
+   * Protocol ABIs per platform
+   */
+  public abis: Record<string, any>;
+
   /**
    * Asset artifacts your protocol contains, and their startblocks.
    * Overwrite this in the inherited class.
@@ -32,19 +48,19 @@ export class OiChainProtocol {
   public protocolMap: ProtocolMap;
 
   /**
-   * Consumer / producer names this protocol processes. Overwrite.
-   */
-  public datasetNames: string[] = [];
-
-  /**
    * Bloom filters to apply on this protocol instance
    */
   public bloomFilter!: string[][];
 
   /**
-   * Consumers, sorted by contract event.
+   * Consumer / producer names this protocol processes. Overwrite.
    */
-  protected consumers: Record<string, OiDataConsumer[]> = {};
+  public datasetNames: string[] = [];
+
+  /**
+   * Dataset map: Same as protocol map but for the data side.
+   */
+  public datasetMap: Record<string, string[]>
 
   /**
    * Protocol constructor. Can overwrite the protocolMap and AssetArtifacts.
@@ -91,9 +107,9 @@ export class OiChainProtocol {
   /**
    * Returns the API for this protocol.
    */
-  public async getAPI(assetArtifact: AssetArtifact, walletName?: string): Promise<OiContractAPI> {
+  public getAPI(assetArtifact: AssetArtifact, walletName?: string): OiContractAPI {
     //TODO: assetArtifacts needs to be in the artifact list.
-    return await this.chain.contract(assetArtifact).getAPI(walletName);
+    return this.chain.contract(assetArtifact).getAPI(walletName);
   }
 
   /**

@@ -1,6 +1,6 @@
 import { OiChain, OiContractConnector } from "@openibex/chain";
 import { AssetArtifactWithBlock, ProtocolMap } from "./protocol";
-import { WithPluginServices } from "@openibex/core";
+import { oiCorePlugins, OiLoggerInterface, WithPluginServices } from "@openibex/core";
 
 /**
  * A scraper collects all data required for a protocol to operate. It orchestrates
@@ -12,7 +12,7 @@ import { WithPluginServices } from "@openibex/core";
  * This includes contracts that do not only reside on EVM but as well others.
  * 
  */
-@WithPluginServices('openibex.chain/chain', 'openibex.chain/log')
+@WithPluginServices('openibex.chain/chain', 'openibex.protocols/log')
 export class OiChainScraper {
   public chain: OiChain;
   public log: any;
@@ -32,9 +32,11 @@ export class OiChainScraper {
   public constructor(assetArtifacts: AssetArtifactWithBlock[], protocolMap: ProtocolMap, bloomFilter?: string[][], params?: any) {
     for( const artifact of assetArtifacts) {
       try {
-        this.chain.provider(artifact.assetArtifact);
+        const chain: OiChain = oiCorePlugins.getPlugin('openibex', 'chain').getService('chain');
+        chain.provider(artifact.assetArtifact);
       } catch {
-        this.log.warn(`Cant scrape ${artifact.assetArtifact.toString()} - Chain or platform not supported.`);
+        const log: OiLoggerInterface = oiCorePlugins.getPlugin('openibex', 'protocols').getService('log') as unknown as OiLoggerInterface;
+        log.warn(`Cant scrape ${artifact.assetArtifact.toString()} - Chain or platform not supported.`);
         continue;
       }
 
