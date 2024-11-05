@@ -3,6 +3,7 @@ import { OiPlugin, OiPluginService } from "@openibex/core";
 import { OiContractAPI, OiContractConnector, OiContractHandler } from "./contracts";
 import { OiBlockHandler } from "./blocks";
 import { OiProviderHandler, OiProvidersList } from "./providers";
+import { OiWalletHandler } from "./wallets";
 
 /**
  * OiChain provides access to all chain resources (scrapers, protocols, APIs, accounts, blocks and transactions)
@@ -31,7 +32,12 @@ export class OiChain extends OiPluginService {
   private blockHandlers: Record<string, typeof OiBlockHandler> = {};
 
   /**
-   * Keeps an instance of every platforms contract handler / abi-management.
+   * Keeps an class of every platforms wallet handler.
+   */
+  private walletHandlers: Record<string, OiWalletHandler> = {};
+
+  /**
+   * Keeps a class of every platforms contract handler / abi-management.
    */
   private contractHandlers: Record<string, typeof OiContractHandler> = {};
 
@@ -60,7 +66,7 @@ export class OiChain extends OiPluginService {
   }
 
   /**
-   * Returns a provider handler.
+   * Returns a block handler.
    * 
    * @param chainArtifact Any chain artifact, or the CAIP platform name as string
    * @returns 
@@ -77,6 +83,21 @@ export class OiChain extends OiPluginService {
     return handler;
   }
 
+  /**
+   * Returns a provider handler.
+   * 
+   * @param chainArtifact Any chain artifact, or the CAIP platform name as string
+   * @returns 
+   */
+  public wallet(chainArtifact: ChainArtifact): OiWalletHandler {
+    const platform = this.caip.getCAIPChain(chainArtifact).namespace;
+
+    const handler = this.walletHandlers[platform];
+
+    if (!handler) throw new Error(`Wallets are not supported on platform ${platform}.`);
+
+    return handler;
+  }
   /**
    * Returns a contract handler for a platform (i.e. all EVM-Chains)
    * 
@@ -99,6 +120,7 @@ export class OiChain extends OiPluginService {
     providerHandler: typeof OiProviderHandler,
     contractHandler: typeof OiContractHandler,
     blockHandler: typeof OiBlockHandler,
+    walletHandler: typeof OiWalletHandler
     // txHandler: OiTransactionHandler,
     // nodeHandler: OiNodeHandler,
     // accountHandler: OiAccountHandler,
@@ -109,6 +131,14 @@ export class OiChain extends OiPluginService {
     this.providerHandlers[caipPlatform] = providerHandler;
     this.contractHandlers[caipPlatform] = contractHandler;
     this.blockHandlers[caipPlatform] = blockHandler;
+    // Wallet handler is once per platform, hence we make it singleton.
+    // FIXME: This could be an onInit hook, but we're too late here.
+    // consider adding another hook decorator to have async methods run
+    // after constructor.
+    // Same goes for provider chainmap that is currently hacked into the constructor. 
+    const wallet = new walletHandler();
+    wallet.init()
+    this.walletHandlers[caipPlatform] = wallet;
   }
 
   /**

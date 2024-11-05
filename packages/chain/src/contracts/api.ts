@@ -1,6 +1,6 @@
 import { Contract, AbiCoder, ethers, FunctionFragment } from "ethers";
 import type { AssetArtifact } from "../caip";
-import { WithPluginServices } from "@openibex/core";
+import { oiCorePlugins, WithPluginServices } from "@openibex/core";
 import { OiChain } from "../chain";
 
 
@@ -26,7 +26,7 @@ export class OiContractAPI {
   constructor(assetArtifact: AssetArtifact, walletName?: string) {
     this.walletName = walletName;
     this.assetArtifact = assetArtifact;
-    this.contract = this.chain.contract(assetArtifact).get(walletName);
+    this.contract = (oiCorePlugins.getPlugin('openibex', 'chain').getService('chain') as unknown as OiChain).contract(assetArtifact).get(walletName);
   }
 
   public getRawContract(): Promise<Contract> {

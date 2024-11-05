@@ -1,6 +1,5 @@
 import { Contract, Provider } from "ethers";
 import { OiContractHandler } from "@openibex/chain";
-import {getWallet } from "@openibex/chain";
 import { WithPluginServices } from "@openibex/core";
 /**
  * Contract factory.
@@ -26,7 +25,7 @@ export class EthereumContractHandler extends OiContractHandler {
     const contract = new Contract(address, this.abi, provider);
   
     if(walletName) {
-      const wallet = getWallet(walletName, this.assetArtifact.chainId);
+      const wallet = this.chain.wallet(this.assetArtifact.chainId).get(walletName);
       if (wallet)
         return contract.connect(wallet.connect(provider)) as Contract;
     }

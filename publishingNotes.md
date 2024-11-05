@@ -13,3 +13,19 @@ later this will be automated by pushing a tag and using github actions. This sti
 1. It is a good idea to check the packages locally before with boilerplate (TODO!) and `npm link`
 1. If boilerplate and all tests look fine, use `npx lerna publish`.
    1. You may need to `npm login` before.
+
+## Testing commands (for now)
+
+```bash
+# Test function calls and execution.
+$> yarn run oi exec --contract eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 --function balanceOf --args 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
+
+# Starts a protocol scraper on all available networks.
+# Alternative protocol: Token - for any token contract.
+# Do multiple times and check the block status. It should
+# continue where you stopped it.
+$> yarn run oi start --scrape usd-circle
+
+# Connects to a contract and dumps all events from startblock.
+yarn oi start --connect eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 --block 6082465
+```
