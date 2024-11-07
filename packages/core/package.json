@@ -22,22 +22,22 @@
     "clean": "npx rimraf node_modules dist"
   },
   "dependencies": {
-    "@chainsafe/libp2p-gossipsub": "^13.0.0",
-    "@orbitdb/core": "^2.2.0",
-    "@orbitdb/set-db": "^1.0.0",
+    "@chainsafe/libp2p-gossipsub": "^14.1.0",
+    "@libp2p/plaintext": "^2.0.10",
+    "@orbitdb/core": "2.4.3",
+    "@orbitdb/set-db": "1.1.0",
     "@types/node": "^20.12.13",
     "blockstore-core": "^4.4.1",
     "blockstore-level": "^1.1.8",
-    "bufferutil": "^4.0.8",
-    "helia": "^4.2.3",
-    "libp2p": "^1.6.1",
+    "helia": "5.1.0",
+    "libp2p": "2.2.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.4",
-    "tsx": "^4.11.2"
+    "tsx": "^4.19.2"
   }
 }

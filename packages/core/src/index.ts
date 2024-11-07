@@ -1,7 +1,9 @@
 export { OiConfig, OiConfigDatabase, OiConfigHelia} from './config';
-export { OiCore, OiLoggerInterface, getOiCore } from './core';
+export { OiCore, getOiCore } from './core';
 
-export { startNode, stopNode, getNodeId} from './node';
+export { OiLoggerInterface } from './types';
+
+export { OiNode, getNodeId} from './node';
 export { initApp } from './init';
 export { OiPreload } from './init';
 

@@ -2,34 +2,9 @@ import { KeyValue } from "@orbitdb/core";
 
 import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./config";
 import { oiCorePlugins, type OiCoreSchema } from "./plugins";
-import { OiDbManager, openDatabase, registerDatabaseTypes } from "./db";
-
-/**
- * A simplistic Logger Interface compatible with standard loggers out there
- * (e.g. winston logging library
- */
-export interface OiLoggerInterface {
-  log(level: string, message: string): void;
-  info(message: string): void;
-  warn(message: string): void;
-  error(message: string): void;
-  // Add other methods if needed
-}
-
-export type OiValueSchema = { 
-  datatype: string, 
-  value: string 
-};
-
-export enum OiValueType {
-  String = "string",
-  Number = "number",
-  Boolean = "boolean",
-  BigInt = "bigint",
-  Symbol = "symbol",
-  Null = "null",
-  Undefined = "undefined"
-}
+import { OiDatabase, OiDbManager, registerDatabaseTypes } from "./db";
+import { OiNode } from "./node";
+import { OiLoggerInterface } from "./types";
 
 // OiCore-Singleton
 let core: OiCore | undefined = undefined;
@@ -84,13 +59,20 @@ async function initOiCore(config: OiConfig, logger: OiLoggerInterface): Promise<
   coreInitLock = true;
 
   if (!config.database.address) throw Error('No DB address for coreDB in config. Please edit your config or run npx oi init');
+  logger.info('Starting Helia IPFS Server...');
+  const node = await OiNode.getInstance(config.helia, config.database, logger);
+  await node.start()
 
   core = new OiCore(config);
+  logger.info('Core created, proceed to core init.');
 
-  const coreDB = await openDatabase(config.database.address, 'keyvalue') as unknown as KeyValue<OiCoreSchema>;
+  const coreDB = await OiDatabase.getInstance().open(config.database.address, 'keyvalue') as unknown as KeyValue<OiCoreSchema>;
+  logger.info('CoreDB successfully opened.');
+
   await core.init(coreDB, logger);
-  
   await oiCorePlugins.initPlugins(config, coreDB, logger);
+
+  coreInitLock = false;
 }
 
 class BaseLogger implements OiLoggerInterface {
@@ -184,7 +166,7 @@ export class OiCore {
 
     return this.valuesDB.get(`${this.namespace}.${this.name}.${name}.${tag ? '.' + tag : ''}`);
   }
-
+  
   //TODO: onUpdateValue(dottedName: string, callback: (key, value) => {})
 
   /**
@@ -209,5 +191,9 @@ export class OiCore {
   public getService(pluginDottedName, serviceName) {
     const [namespace, pluginName] = pluginDottedName.split('.');
     return oiCorePlugins.getPlugin(namespace, pluginName).getService(serviceName);
+  }
+
+  public async stop() {
+    await OiNode.getInstance().stop();
   }
 }
