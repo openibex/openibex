@@ -166,13 +166,13 @@ export class OiCore {
    * Stores a settings value for a plugin (persistent, among all workers)
    * 
    * @param value Value to store
-   * @param name Setting name
+   * @param name Setting name recommendation is to have dotted names.
    * @param tag Tag, will be added to the name for entity-specific settings. (i.e. a connector setting that can be changed per contract.)
    */
   public async setVal(value: any, name: string, tag?: string): Promise<void> {
     if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
 
-    await this.valuesDB.put(`${this.namespace}.${this.name}.${name}.${tag ? '.' + tag : ''}`, value);
+    await this.valuesDB.put(`${this.namespace}.${name}.${tag ? '.' + tag : ''}`, value);
   }
 
   /**
@@ -186,9 +186,22 @@ export class OiCore {
   public async getVal(name: string, tag?: string): Promise<any> {
     if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
 
-    return this.valuesDB.get(`${this.namespace}.${this.name}.${name}.${tag ? '.' + tag : ''}`);
+    return await this.valuesDB.get(`${this.namespace}.${name}.${tag ? '.' + tag : ''}`);
   }
-  
+
+  /**
+   * Deletes a value.
+   * 
+   * @param name Setting name
+   * @param tag Tag, will be added to the name for entity-specific settings. (i.e. a connector setting that can be changed per contract.)
+   * @returns 
+   */
+  public async delVal(name: string, tag?: string): Promise<any> {
+    if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
+
+    await this.valuesDB.del(`${this.namespace}.${name}.${tag ? '.' + tag : ''}`);
+  }
+    
   //TODO: onUpdateValue(dottedName: string, callback: (key, value) => {})
 
   /**
