@@ -130,8 +130,8 @@ export class OiEventIndexer{
     let lastBlock: number = fromBlock - 1;
     const batchSize: number = this.chain.provider(this.assetArtifact).getSetting('batchSize');
     
-    for (let startBlock = fromBlock; startBlock <= await this.chain.blocks(this.assetArtifact).latest(this.assetArtifact); startBlock += batchSize) {
-      const endBlock = Math.min(startBlock + batchSize - 1, await this.chain.blocks(this.assetArtifact).latest(this.assetArtifact));
+    for (let startBlock = fromBlock; startBlock <= await this.chain.blocks(this.assetArtifact).latest(); startBlock += batchSize) {
+      const endBlock = Math.min(startBlock + batchSize - 1, await this.chain.blocks(this.assetArtifact).latest());
       const events = await this.importBatch(startBlock, endBlock);
   
       this.log.info(`Found ${events.length} events for ${this.assetArtifact} in blocks ${startBlock} to ${endBlock}`);
