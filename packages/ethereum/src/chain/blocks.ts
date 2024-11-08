@@ -18,9 +18,9 @@ export class EthereumBlockHandler extends OiBlockHandler {
    * @param chainArtifact ChainId or other ChainArtifact
    * @param callback 
    */
-  public async subscribeLatest(chainArtifact: ChainArtifact, callback: (chainId: ChainId, block: number) => void) {
-    const provider = await this.chain.provider(chainArtifact).get();
-    const chainId = this.caip.getCAIPChain(chainArtifact);
+  public async subscribeLatest(callback: (chainId: ChainId, block: number) => Promise<void>) {
+    const provider = await this.chain.provider(this.chainArtifact).get();
+    const chainId = this.caip.getCAIPChain(this.chainArtifact);
 
     provider.on('block', (blockNumber: number) => {
       callback(chainId, blockNumber);
@@ -33,12 +33,12 @@ export class EthereumBlockHandler extends OiBlockHandler {
    * @param chainId The chain for which to retrieve.
    * @returns 
    */
-  public async latest(chainId: ChainArtifact): Promise<number> {
-    const chainName = this.caip.getCAIPChain(chainId).toString();
+  public async latest(): Promise<number> {
+    const chainName = this.getChainId().toString();
 
     if(!(chainName in this.latestBlocks)) {
-      this.subscribeLatest(chainId, (chain, block) => {this.latestBlocks[chain.toString()] = block;});
-      this.latestBlocks[chainName] = await this.chain.provider(chainId).get().getBlockNumber();
+      this.subscribeLatest(async (chain, block) => {this.latestBlocks[chain.toString()] = block;});
+      this.latestBlocks[chainName] = await this.chain.provider(this.getChainId()).get().getBlockNumber();
     }
 
     return this.latestBlocks[chainName];
