@@ -78,7 +78,7 @@ export class OiNode {
     this.log.info(`stopNode: Stopping Helia. Please wait.`);
     await this.ipfsNode.stop();
     //this.log.info(`stopNode: Stopping Libp2p. Please wait.`);
-    //await this.libp2pNode.stop();
+    await this.libp2pNode.stop();
     this.log.info(`stopNode: Orbitdb and Helia stopped.`);
   }
 
