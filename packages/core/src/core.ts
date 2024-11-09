@@ -1,7 +1,7 @@
 import { KeyValue } from "@orbitdb/core";
 
 import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./config";
-import { oiCorePlugins, type OiCoreSchema } from "./plugins";
+import { oiCorePlugins, OiPluginService, type OiCoreSchema } from "./plugins";
 import { OiDbManager, openDatabase, registerDatabaseTypes } from "./db";
 
 /**
@@ -202,11 +202,16 @@ export class OiCore {
   /**
    * Returns a plugin service. Shorthand abstraction of plugin registry.
    * 
-   * @param pluginDottedName 
-   * @param serviceName 
-   * @returns 
+   * @param pluginDottedName Dotted plugin name in format <namespace>.<pluginName> as registered
+   * @param serviceName Name of the service as registered in the plugin.
+   * @returns Instance derived from OiService
    */
-  public getService(pluginDottedName, serviceName) {
+  public getService(pluginDottedName, serviceName): OiPluginService {
+    let dotCount: number = pluginDottedName.split('.').length - 1;
+    if(dotCount != 1) {
+      throw new Error("pluginDottedName needs to follow format <namespace>.pluginName");
+    }
+
     const [namespace, pluginName] = pluginDottedName.split('.');
     return oiCorePlugins.getPlugin(namespace, pluginName).getService(serviceName);
   }
