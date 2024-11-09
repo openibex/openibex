@@ -1,6 +1,5 @@
 import { OiChain } from "./chain";
-import { oiCorePlugins, OiPlugin } from "@openibex/core";
-import { OnPluginInitHook } from "@openibex/core";
+import { OiPlugin, OiPluginRegistry } from "@openibex/core";
 import { OiProviderHandler } from "./providers";
 import { OiContractHandler } from "./contracts";
 import { OiBlockHandler } from "./blocks";
@@ -51,7 +50,7 @@ export class OiChainBundle {
 
   
   public async init(plugin: OiPlugin): Promise<void> {
-    const chain: OiChain = oiCorePlugins.getPlugin('openibex', 'chain').getService('chain') as unknown as OiChain;
+    const chain: OiChain = OiPluginRegistry.getInstance().getPlugin('openibex', 'chain').getService('chain') as unknown as OiChain;
     chain.registerBundle(this.caipPlatform, this.providerHandler, this.contractHandler, this.blockHandler, this.walletHandler);
   }
 }

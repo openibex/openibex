@@ -1,7 +1,7 @@
 import { KeyValue } from "@orbitdb/core";
 
 import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./config";
-import { oiCorePlugins, OiPluginService, type OiCoreSchema } from "./plugins";
+import { OiPluginService, OiPluginRegistry, type OiCoreSchema, OiPlugin } from "./plugins";
 import { OiDbManager, openDatabase, registerDatabaseTypes } from "./db";
 
 /**
@@ -35,6 +35,13 @@ export enum OiValueType {
 let core: OiCore | undefined = undefined;
 let coreInitLock: boolean = false;
 
+// Either keeps the logger when defined
+// or returns a BaseLogger
+// This is for startup-procedure only, then the OiCore has the logger internally.
+function getLogger(logger: OiLoggerInterface | undefined): OiLoggerInterface {
+  return logger ? logger : new BaseLogger();  
+}
+
 /**
  * Retrieves the core (and initializes it on first call)
  * 
@@ -52,7 +59,8 @@ let coreInitLock: boolean = false;
  * @returns Fully operational OiCore instance representing the app.
  */
 export async function getOiCore(config: OiConfig | undefined = undefined, logger: OiLoggerInterface | undefined = undefined): Promise<OiCore> {
-  while(coreInitLock) {
+  while(coreInitLock) { 
+    getLogger(logger).warn("OiCore is currently initializing... wait")
     await new Promise(resolve => setTimeout(resolve, 25))
   }
   
@@ -61,13 +69,13 @@ export async function getOiCore(config: OiConfig | undefined = undefined, logger
       throw Error("Core still needs to be initialized. For initialization, config and logger are required");
     }
 
-    // Per default, initialize the oiLogger
-    if(logger === undefined) {
-      logger = new BaseLogger();
-    }
     registerDatabaseTypes();
-    await initOiCore(config!, logger);
+    await initOiCore(config!, getLogger(logger));
   } 
+
+  if(!core.isInitialized) {
+    throw new Error("OiCore is not fully initialized yet. Have you used getOiCore() in plugin inits?")
+  }
   return core!;
 }
 
@@ -88,9 +96,8 @@ async function initOiCore(config: OiConfig, logger: OiLoggerInterface): Promise<
   core = new OiCore(config);
 
   const coreDB = await openDatabase(config.database.address, 'keyvalue') as unknown as KeyValue<OiCoreSchema>;
-  await core.init(coreDB, logger);
+  await core.init(config, coreDB, logger);
   
-  await oiCorePlugins.initPlugins(config, coreDB, logger);
 }
 
 class BaseLogger implements OiLoggerInterface {
@@ -132,6 +139,8 @@ export class OiCore {
   private appDbManager!: OiDbManager;
   private valuesDB!: KeyValue<any>
   public log!: OiLoggerInterface;
+  private _isInitialized: boolean = false;
+
 
   /**
    * Construtor for OiCore
@@ -143,19 +152,32 @@ export class OiCore {
     this.dbConf = config.database;
     this.heliaConf = config.helia;
     this.pluginConf = config.plugins;
+    this._isInitialized = false;
+  }
+
+  public isInitialized(): boolean {
+    return this._isInitialized;
   }
 
   /**
-   * Plugin initialization. Sets logger, coreDB, valueDB and calls all initFragments.
+   * Sets logger, coreDB, valueDB and calls all initFragments.
+   * 
+   * The core is no plugin itself, yet this calls the init-functions of the plugins
    * 
    * @param config Application config object.
    * @param coreDB Core database
    * @param logger 
    */
-  public async init(coreDB: KeyValue<OiCoreSchema>, logger: any): Promise<void> {
+  public async init(config: OiConfig, coreDB: KeyValue<OiCoreSchema>, logger: any): Promise<void> {
+    if(this.isInitialized()) {
+      throw new Error("OiCore can only be initialized once");
+    }
     this.log = logger;
     this.appDbManager = new OiDbManager(`${this.dbConf.namespace}`, logger, coreDB);
     this.valuesDB = await this.appDbManager.getDB(1, 'keyvalue', `values`) as unknown as KeyValue<any>;
+    
+    await OiPluginRegistry.getInstance().initPlugins(config, coreDB, logger);
+    this._isInitialized = true;
   }
 
     /**
@@ -213,6 +235,20 @@ export class OiCore {
     }
 
     const [namespace, pluginName] = pluginDottedName.split('.');
-    return oiCorePlugins.getPlugin(namespace, pluginName).getService(serviceName);
+    return OiPluginRegistry.getInstance().getPlugin(namespace, pluginName).getService(serviceName);
+  }
+
+  /**
+   * Get a fully initialized OiPlugin by name.
+   * 
+   * @param namespace Namespace for the plugins
+   * @param pluginName The name of the plugin, as registered
+   * @returns Initialized OiPlugin
+   */
+  public getPlugin(namespace:string, pluginName:string): OiPlugin {
+    if(!this.isInitialized()) {
+      throw new Error("Plugins are only available and initialized after OiCore.init()")
+    }
+    return OiPluginRegistry.getInstance().getPlugin(namespace, pluginName);
   }
 }

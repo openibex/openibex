@@ -3,7 +3,7 @@ import { OiProviderHandler, OiRateLimiter } from '@openibex/chain';
 import EthereumPlugin from '../plugin';
 import { AccountId } from 'caip';
 import { ChainArtifact } from '@openibex/chain';
-import { oiCorePlugins } from '@openibex/core';
+import { OiPluginRegistry } from '@openibex/core';
 
 // Restructure the configuration for easier lookup
 export const chainMap = {};
@@ -24,11 +24,10 @@ export class EthereumProviderHandler extends OiProviderHandler {
   constructor(chainArtifact: ChainArtifact, providerName: string = 'default') {
     super(chainArtifact, providerName);
 
-    const plugin = oiCorePlugins.getPlugin('openibex', 'ethereum');
-    this.plugin = plugin;
+    this.plugin = OiPluginRegistry.getInstance().getPlugin('openibex', 'ethereum');
     
-    for (const chainName in plugin.config['networks']) {
-      const chainId = plugin.config['networks'][chainName].chainId;
+    for (const chainName in this.plugin.config['networks']) {
+      const chainId = this.plugin.config['networks'][chainName].chainId;
       chainMap[`eip155:${chainId}`] = chainName;
     }
   }

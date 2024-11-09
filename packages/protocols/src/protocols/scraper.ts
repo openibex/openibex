@@ -1,6 +1,6 @@
 import { OiChain, OiContractConnector } from "@openibex/chain";
 import { AssetArtifactWithBlock, ProtocolMap } from "./protocol";
-import { oiCorePlugins, OiLoggerInterface, WithPluginServices } from "@openibex/core";
+import { OiLoggerInterface, OiPluginRegistry, WithPluginServices } from "@openibex/core";
 
 /**
  * A scraper collects all data required for a protocol to operate. It orchestrates
@@ -32,10 +32,10 @@ export class OiChainScraper {
   public constructor(assetArtifacts: AssetArtifactWithBlock[], protocolMap: ProtocolMap, bloomFilter?: string[][], params?: any) {
     for( const artifact of assetArtifacts) {
       try {
-        const chain: OiChain = oiCorePlugins.getPlugin('openibex', 'chain').getService('chain');
+        const chain: OiChain = OiPluginRegistry.getInstance().getPlugin('openibex', 'chain').getService('chain');
         chain.provider(artifact.assetArtifact);
       } catch {
-        const log: OiLoggerInterface = oiCorePlugins.getPlugin('openibex', 'protocols').getService('log') as unknown as OiLoggerInterface;
+        const log: OiLoggerInterface = OiPluginRegistry.getInstance().getPlugin('openibex', 'protocols').getService('log') as unknown as OiLoggerInterface;
         log.warn(`Cant scrape ${artifact.assetArtifact.toString()} - Chain or platform not supported.`);
         continue;
       }

@@ -36,6 +36,8 @@ export function OnPluginInitHook(pluginFullName: string, hookName: string) {
 
 /**
  * Register a plugin class.
+ * An instance of the class will be created and stored in the PluginRegistry.
+ * This instance can subsequently be retrieved by calling getPlugin("namespace.pluginName")
  * 
  * @param namespace Plugin namespace (i.e. 'openibex')
  * @param pluginName Plugin name (i.e. 'chain')

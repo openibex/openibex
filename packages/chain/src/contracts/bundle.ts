@@ -1,8 +1,7 @@
 import { OiContractAPI } from "./api";
 import { OiContractConnector } from "./connector";
 import { OiChain } from "../chain";
-import { oiCorePlugins, OiPlugin } from "@openibex/core";
-import { OnPluginInitHook } from "@openibex/core";
+import { OiPlugin, OiPluginRegistry } from "@openibex/core";
 
 /**
  * Contract handler registers an abi, api and connector for a contract.
@@ -25,7 +24,7 @@ export class OiContractBundle {
 
   
   public async init(plugin: OiPlugin): Promise<void> {
-    const chain: OiChain = oiCorePlugins.getPlugin('openibex', 'chain').getService('chain') as unknown as OiChain;
+    const chain: OiChain = OiPluginRegistry.getInstance().getPlugin('openibex', 'chain').getService('chain') as unknown as OiChain;
     chain.registerContract(this.caipPlatform, this.caipAssetNamespace, this.abi, this.api, this.connector);
   }
 }
