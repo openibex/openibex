@@ -17,16 +17,28 @@ later this will be automated by pushing a tag and using github actions. This sti
 ## Testing commands (for now)
 
 ```bash
+# Core: Set, get and delete values.
+$> yarn oi value set value.name value
+$> yarn oi value get value.name
+$> yarn oi value del value.name
+
+# Core: Watch 
+# Watch takes any exec or value command and executes it in intervals.
+# The command has to be quoted.
+$> yarn oi exec watch --seconds 2 watch --blocks 2 --network eip155:1 "value get testval --tag 3"
+# Get an account balance at every second block:
+$>watch --blocks 2 --network eip155:1 "exec eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 balanceOf 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360"
+
 # Test function calls and execution.
-$> yarn run oi exec eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 balanceOf 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
+$> yarn oi exec eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 balanceOf 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
 # Use a wallet.
-$> yarn run oi exec --wallet default eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 balanceOf 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
+$> yarn oi exec --wallet default eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 balanceOf 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
 
 # Starts a protocol scraper on all available networks.
 # Alternative protocol: Token - for any token contract.
 # Do multiple times and check the block status. It should
 # continue where you stopped it.
-$> yarn run oi protocol usd-circle --scrape
+$> yarn oi protocol usd-circle --scrape
 
 # Connects to a contract and dumps all events from startblock.
 yarn oi connect eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 --block 6082465

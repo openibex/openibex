@@ -35,16 +35,16 @@ export default class WatchCommand extends OiCommand {
       return;
     }
 
-    this.logger.info(`Starting to watch command ${cmd.join(' ')}`);
-
     const watchprog = new Command();
     if(cmd[0] === 'value') {
+      this.logger.info(`Starting watch in ${options.seconds}s interval. CMD: ${command}`);
       watchprog.addCommand(new ValueCommand(
         this.oiCore, 
         this.config, 
         this.logger
       ).allowUnknownOption());
     } else if(cmd[0] === 'exec') {
+      this.logger.info(`Starting watch in ${options.blocks} blocks on network ${options.network} interval. CMD: ${command}`);
       watchprog.addCommand(new ExecCommand(
         this.oiCore, 
         this.config, 
@@ -67,7 +67,6 @@ export default class WatchCommand extends OiCommand {
 
       const moduloval = await chain.blocks(id).latest() % blocks;
       chain.blocks(id).subscribeLatest( async (chainId: ChainId, block: number) => {
-        
         if (block % blocks == moduloval) {
           await watchprog.parseAsync(cmd, {from: 'user'});
         }
