@@ -1,4 +1,4 @@
-import { OiChainRegister } from '@openibex/chain';
+import { OiChainBundle } from '@openibex/chain';
 import { EthereumProviderHandler } from './provider';
 import { EthereumContractHandler } from './contract';
 import { EthereumBlockHandler } from './blocks';
@@ -14,9 +14,9 @@ export { EthereumEventIndexer } from './indexer';
 export { EthereumContractAPI } from './api';
 
 @OnPluginInitHook('openibex.ethereum', 'register eip155 chain')
-class EthereumChainRegister extends OiChainRegister {}
+class EthereumChainBundle extends OiChainBundle {}
 
-export default new EthereumChainRegister(
+export default new EthereumChainBundle(
   'eip155', 
   EthereumProviderHandler, 
   EthereumContractHandler, 

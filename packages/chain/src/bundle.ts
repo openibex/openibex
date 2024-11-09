@@ -9,7 +9,7 @@ import { OiWalletHandler } from "./wallets";
 /**
  * Contract handler registers an abi, api and connector for a contract.
  */
-export class OiChainRegister {
+export class OiChainBundle {
   private providerHandler: typeof OiProviderHandler;
   private contractHandler: typeof OiContractHandler;
   private blockHandler: typeof OiBlockHandler;
@@ -52,6 +52,6 @@ export class OiChainRegister {
   
   public async init(plugin: OiPlugin): Promise<void> {
     const chain: OiChain = oiCorePlugins.getPlugin('openibex', 'chain').getService('chain') as unknown as OiChain;
-    chain.register(this.caipPlatform, this.providerHandler, this.contractHandler, this.blockHandler, this.walletHandler);
+    chain.registerBundle(this.caipPlatform, this.providerHandler, this.contractHandler, this.blockHandler, this.walletHandler);
   }
 }

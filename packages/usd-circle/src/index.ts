@@ -2,12 +2,12 @@
 import { OnPluginInitHook } from '@openibex/core';
 import './plugin';
 import { OiUSDCircleProtocol } from './protocol';
-import { OiProtocolRegister } from '@openibex/protocols';
+import { OiProtocolBundle } from '@openibex/protocols';
 
 export { OiUSDCircleProtocol } from "./protocol";
 export { USDCircleAbi } from './abi';
 
 @OnPluginInitHook('openibex.protocols', 'registring token')
-class OiUSDCircleProtocolRegister extends OiProtocolRegister {}
+class OiUSDCircleProtocolBundle extends OiProtocolBundle {}
 
-export default new OiUSDCircleProtocolRegister('usd-circle', OiUSDCircleProtocol);
+export default new OiUSDCircleProtocolBundle('usd-circle', OiUSDCircleProtocol);

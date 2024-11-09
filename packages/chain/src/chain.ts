@@ -115,7 +115,7 @@ export class OiChain extends OiPluginService {
     return handler;
   }
 
-  public register(
+  public registerBundle(
     caipPlatform: string, 
     providerHandler: typeof OiProviderHandler,
     contractHandler: typeof OiContractHandler,

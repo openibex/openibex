@@ -7,7 +7,7 @@ import { OnPluginInitHook } from "@openibex/core";
 /**
  * Contract handler registers an abi, api and connector for a contract.
  */
-export class OiContractRegister {
+export class OiContractBundle {
   private abi: any;
   private api: typeof OiContractAPI;
   private connector: typeof OiContractConnector;

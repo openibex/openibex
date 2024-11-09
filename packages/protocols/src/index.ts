@@ -4,4 +4,4 @@ export { OiChainProtocol, type AssetArtifactWithBlock, type ProtocolMap } from '
 export { OiTokenProtocol } from './token';
 export { OiChainTokenSupplyProducer } from './producers/supply';
 export { OiChainProtocols } from './protocols';
-export { OiProtocolRegister } from './protocols';
+export { OiProtocolBundle } from './bundle';

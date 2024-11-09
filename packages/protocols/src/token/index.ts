@@ -1,10 +1,10 @@
 import { OnPluginInitHook } from "@openibex/core";
-import { OiProtocolRegister } from "../protocols";
+import { OiProtocolBundle } from "../bundle";
 import { OiTokenProtocol } from "./token";
 
 export { OiTokenProtocol } from './token';
 
 @OnPluginInitHook('openibex.protocols', 'registring token')
-class OiTokenProtocolRegister extends OiProtocolRegister {}
+class OiTokenProtocolRegister extends OiProtocolBundle {}
 
 export default new OiTokenProtocolRegister('token', OiTokenProtocol);

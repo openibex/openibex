@@ -51,7 +51,7 @@ export class OiChainProtocols extends OiPluginService {
    * @param handles Mappings between contract ABI and protocol.
    * @param protocol 
    */
-  public register(handle: string, protocol: typeof OiChainProtocol) {
+  public registerProtocol(handle: string, protocol: typeof OiChainProtocol) {
     this.protocolRegister[handle] = protocol;
 
     const protoInstance = new this.protocolRegister[handle]();

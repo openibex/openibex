@@ -2,4 +2,4 @@ export { OiContractHandler } from './contract';
 export { OiContractConnector, type OiContractConnectorParams } from './connector';
 export { OiContractAPI } from './api';
 export { OiEventIndexer } from './indexer';
-export { OiContractRegister } from './register';
+export { OiContractBundle } from './bundle';

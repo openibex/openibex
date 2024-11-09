@@ -1,12 +1,11 @@
 import { oiCorePlugins, OiPlugin } from "@openibex/core";
-import { OiChainProtocol } from "./protocol";
-import { OiChainProtocols } from "./protocols";
+import { OiChainProtocols, OiChainProtocol } from "./protocols";
 import { OiChain } from "@openibex/chain";
 
 /**
  * Contract handler registers an abi, api and connector for a contract.
  */
-export class OiProtocolRegister {
+export class OiProtocolBundle {
   private protocol: typeof OiChainProtocol;
    
   private protocolHandle: string;
@@ -21,7 +20,7 @@ export class OiProtocolRegister {
   }
 
   public async init(plugin: OiPlugin): Promise<void> {
-    const protocolRegistry: OiChainProtocols = oiCorePlugins.getPlugin('openibex', 'protocols').getService('protocols');
-    protocolRegistry.register(this.protocolHandle, this.protocol);
+    const protocolBundle: OiChainProtocols = oiCorePlugins.getPlugin('openibex', 'protocols').getService('protocols');
+    protocolBundle.registerProtocol(this.protocolHandle, this.protocol);
   }
 }

@@ -3,4 +3,3 @@ export { OiProtocolAPI } from './api';
 export { OiProtocolConnector } from './connector';
 export { OiChainScraper } from './scraper';
 export { OiChainProtocols } from './protocols';
-export { OiProtocolRegister } from './register';
