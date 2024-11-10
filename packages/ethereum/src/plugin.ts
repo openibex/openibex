@@ -1,19 +1,17 @@
-import { registerOiPlugin } from "@openibex/core";
 import { OiPlugin } from "@openibex/core";
-
-export const pluginName = 'chain-evm';
-export const pluginNamespace = 'openibex';
+import { RegisterPlugin } from "@openibex/core";
 
 // Plugin Config with defaults. Merged on init with config from core.
-const pluginDefaultConfig = {};
+const pluginDefaultConfig = {
+  wallets: {},
+  networks: {}
+};
 
-export let pluginConfig = pluginDefaultConfig;
+@RegisterPlugin()
+export default class EthereumPlugin extends OiPlugin {}
 
-export let plugin: OiPlugin = new OiPlugin(pluginName, pluginNamespace);
-
-plugin.onInit('chain-evm', async (name: string, config: any, plugin: OiPlugin) : Promise<void> => {
-  pluginConfig = config;
+new EthereumPlugin('openibex', 'ethereum', {
+  config: pluginDefaultConfig,
+  dependencies: ['openibex.chain'],
+  services: {}
 });
-
-// Register the plugin
-registerOiPlugin(pluginName, pluginNamespace, plugin);

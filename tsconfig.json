@@ -8,6 +8,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    // Required for method decorators.
+    "experimentalDecorators": true,
     // FIXME bad idea below - this needs to be removed but helps now in allowing
     // broken code to compile
     "noImplicitAny": false,

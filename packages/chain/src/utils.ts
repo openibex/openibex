@@ -1,8 +1,13 @@
 import { AccountId } from "caip";
-import { ChainArtifact, getCAIPChain } from "./resolver";
+import { ChainArtifact, OiCaipHelper } from "./caip";
+import { getOiCore } from "@openibex/core";
+import OiChainPlugin from "./plugin";
+
+const plugin: OiChainPlugin = getOiCore().getPlugin('openibex', 'chain');
+const caip: OiCaipHelper = plugin.getService('caip');
 
 export function getMintAddress(chainArtifact: ChainArtifact) {
-  const chainId = getCAIPChain(chainArtifact);
+  const chainId = caip.getCAIPChain(chainArtifact);
 
   if (chainId.namespace == 'eip155'){
     return new AccountId({chainId, address: "0x0000000000000000000000000000000000000000" });
@@ -12,7 +17,7 @@ export function getMintAddress(chainArtifact: ChainArtifact) {
 }
 
 export function getBurnAddress(chainArtifact: ChainArtifact) {
-  const chainId = getCAIPChain(chainArtifact);
+  const chainId = caip.getCAIPChain(chainArtifact);
 
   if (chainId.namespace == 'eip155'){
     return new AccountId({chainId, address: "0xffffffffffffffffffffffffffffffffffffffff" });

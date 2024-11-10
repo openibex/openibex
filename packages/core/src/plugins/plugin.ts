@@ -1,6 +1,7 @@
 import { KeyValue } from "@orbitdb/core";
 import { OiLoggerInterface } from "../core";
-import { openDatabase } from "../db";
+import { OiDbManager } from "../db";
+import { OiPluginService } from "./service";
 
 export type OiCoreSchema = { 
   address: string; 
@@ -26,16 +27,18 @@ export type OiCoreSchema = {
  * the first call to getOiCore() plugins are initialized.
  */
 export class OiPlugin {
-  private isInitialized: boolean = false;
+  protected isInitialized: boolean = false;
 
-  private pluginName: string;
-  private pluginNamespace: string;
+  public name: string;
+  public namespace: string;
+  public config: any = {};
+  public dependencies: string[] = []
 
-  private initFragments: Record< string, (name: string, config: any, plugin: OiPlugin) => Promise<void>>;
+  protected initHooks: Record< string, (plugin: OiPlugin) => Promise<void>> = {};
+  protected pluginServices: Record< string, OiPluginService> = {};
 
   public log!: OiLoggerInterface;
-  private coreDB!: KeyValue<OiCoreSchema>;
-  private valuesDB!: KeyValue<any>;
+  public db!: OiDbManager;
   
   /**
    * After constructor the Plugin will not be initialized but is ready to run init()
@@ -43,14 +46,19 @@ export class OiPlugin {
    * 
    * @param pluginName Name of the plugin.
    * @param pluginNamespace Namespace of the plugin.
+   * @param setup Plugin configuration.
    */
-  constructor(pluginName: string, pluginNamespace: string){
-    this.pluginName = pluginName;
-    this.pluginNamespace = pluginNamespace;
+  constructor(pluginNamespace: string, pluginName: string, setup: {config?: any, dependencies?: string[], services?: Record<string, OiPluginService>}){
+    this.name = pluginName;
+    this.namespace = pluginNamespace;
+    this.config = setup.config ? setup.config : {};
+    this.dependencies = setup.dependencies ? setup.dependencies : [];
 
-    this.initFragments = {};
+    for(const serviceName of Object.keys(setup.services)) {
+      this.pluginServices[serviceName] = setup.services[serviceName];
+    }
   }
-
+  
   /**
    * Adds an init callback which is executed in the init function. Init callbacks
    * are used by TypeScript modules within the plugin to initialize databases,
@@ -59,19 +67,22 @@ export class OiPlugin {
    * @param name Name of the module filing the init callback
    * @param callback The init callback.
    */
-  public onInit(name: string, callback: (name: string, config: any, plugin: OiPlugin) => Promise<void>) {
-    this.initFragments[name] = callback;
+  public onInit(name: string, callback: (plugin: OiPlugin) => Promise<void>) {
+    if(this.isInitialized) {
+      throw Error(`Plugin ${this.namespace}.${this.name} is already initialized cant add hook ${name}`)
+    }
+
+    this.initHooks[name] = callback;
   }
   
   /**
-   * Plugin initialization. Sets logger, coreDB, valueDB and calls all initFragments.
+   * Plugin initialization. Sets logger, coreDB and calls all initHooks.
    * 
-   * @param appNamespace Application namespace
    * @param config Application config object.
    * @param coreDB Core database
    * @param logger 
    */
-  public async init(appNamespace: string, config: any, coreDB: KeyValue<OiCoreSchema>, logger: any): Promise<void> {
+  public async init(config: any, coreDB: KeyValue<OiCoreSchema>, logger: any): Promise<void> {
     if(this.isInitialized) {
       throw Error("Core was already initialized earlier, init() can only be called once!");
     }
@@ -79,74 +90,31 @@ export class OiPlugin {
     this.isInitialized = true;
 
     this.log = logger;
-    this.coreDB = coreDB;
-    this.valuesDB = await this.getDB(1, 'keyvalue', `${appNamespace}.core.values`) as unknown as KeyValue<any>;
+    this.db = new OiDbManager(`${this.namespace}.${this.name}`, logger, coreDB);
+    this.config = config;
     
-    if(!this.initFragments)
-      this.log.warn(`Init Plugin: No init fragments found for ${this.pluginNamespace}.${this.pluginName}`);
+    let promises = Object.keys(this.pluginServices).map( (serviceName) => { 
+      this.log.info(`Plugin ${this.namespace}.${this.name} initializing service ${serviceName}.`);
+      return this.pluginServices[serviceName].init(this);
+    });
 
-    const promises = Object.keys(this.initFragments).map(fragName => 
-      this.initFragments[fragName](this.pluginName, config, this)
-    );
-  
+    await Promise.all(promises);
+
+    promises = Object.keys(this.initHooks).map((fragName) => {
+      this.log.info(`Plugin ${this.namespace}.${this.name} running hook ${fragName}.`);
+      return this.initHooks[fragName](this);
+    });
     await Promise.all(promises);
   }
 
-  /**
-   * Stores a settings value for a plugin (persistent, among all workers)
-   * 
-   * @param value Value to store
-   * @param name Setting name
-   * @param tag Tag, will be added to the name for entity-specific settings. (i.e. a connector setting that can be changed per contract.)
-   */
-  public async setVal(value: any, name: string, tag?: string): Promise<void> {
-    if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
-
-    await this.valuesDB.put(`${this.pluginNamespace}.${this.pluginName}.${name}.${tag ? '.' + tag : ''}`, value);
+  public addService<T extends OiPluginService>(name: string, serviceInstance: T) {
+    this.pluginServices[name] = serviceInstance;
   }
 
-  /**
-   * Get a stored settings value by name. All settings are namespaced
-   * and thus names only need to be unique within your plugin.
-   * 
-   * @param name Setting name
-   * @param tag Tag, will be added to the name for entity-specific settings. (i.e. a connector setting that can be changed per contract.)
-   * @returns 
-   */
-  public async getVal(name: string, tag?: string): Promise<any> {
-    if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
+  public getService<T extends OiPluginService>(name?: string): T {
+    if(!name) name = this.name;
+    if(!this.pluginServices[name]) throw Error(`Service ${name} not found in ${this.namespace}.${this.name}`);
 
-    return this.valuesDB.get(`${this.pluginNamespace}.${this.pluginName}.${name}.${tag ? '.' + tag : ''}`);
-  }
-
-  /**
-   * Opens a database in read / write mode.
-   * 
-   * @param name - DB identifier
-   * @param revision - Schema revision
-   * @param type - Orbitdb Type, includes registered custom types.
-   * @returns An OrbitDB Database of the specified type.
-   */
-  public async getDB(revision: number, type: string, name: string, tag?: string): Promise<any> {
-    if (!this.coreDB) throw Error('Database coreDB not initialized. Run OiCore.init() first.');
-
-    const dbName = `${this.pluginNamespace}.${this.pluginName}.${name}.v${revision}${tag? '.'+ tag : ''}`;
-    let dbOpts: OiCoreSchema | undefined = await this.coreDB.get(dbName);
-
-    const db = await openDatabase(dbOpts ? dbOpts.address : dbName, dbOpts ? dbOpts.type: type);
-
-    this.log.info(`Opened DB ${dbName} at address ${db.address}`);
-
-    if(!dbOpts) {
-      dbOpts = {
-        address: db.address,
-        type,
-        revision
-      } as unknown as OiCoreSchema
-
-      await this.coreDB.put(dbName, dbOpts)
-    }
-    
-    return db;
+    return this.pluginServices[name] as unknown as T;
   }
 }

@@ -19,12 +19,23 @@ import '@openibex/ethereum';
  * 
  * @returns An OpenIbex App configuration.
  */
+/**
+ * Load the configuration from an yaml-file.
+ * 
+ * @returns An OpenIbex App configuration.
+ */
 async function loadConfig(): Promise<OiConfig> {
   const configFile = fs.readFileSync('config.yaml', 'utf8');
   const config = yaml.parse(configFile) as OiConfig;
   return config;
 }
 
+/**
+ * Loads preload.yaml with plugin-specific entries. I.e. plugin databases
+ * that are customized.
+ * 
+ * @returns An OiPreload object.
+ */
 /**
  * Loads preload.yaml with plugin-specific entries. I.e. plugin databases
  * that are customized.
@@ -80,7 +91,15 @@ async function main() {
     (yargs) => {
       // FIXME move this to startArgs in start.ts
       return yargs.option('connect', {
-        describe: 'This command connects any protocol that has a connector. Example: ERC20 (USDC) on ETH eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        describe: 'This command connects any contract that has a connector. Example: ERC20 (USDC) on ETH eip155:1/erc20:0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        default: undefined,
+        demandOption: false
+      }).option('block', {
+        describe: 'This is an addon to connect. It allows to specify the startblock. Example: USDC on ETH 6082465',
+        default: undefined,
+        demandOption: false
+      }).option('scrape', {
+        describe: 'This command connects any protocol that has a connector. Example: USDC (on every supported chain) \'usd-circle\'',
         default: undefined,
         demandOption: false
       });
@@ -113,3 +132,4 @@ await main().catch(err => {
   oiLogger.error(err);
   yargs().exit(1, err);
 });
+

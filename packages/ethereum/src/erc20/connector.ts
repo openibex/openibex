@@ -1,9 +1,8 @@
-import { ERC20abi } from "./abi";
-import { AssetArtifact, lookupCaipTag, useABI, useContractConnector,  OiChainTokenSupply, OiContractConnector, OiContractConnectorParams, useContractAPI  } from "@openibex/chain";
-import { plugin } from "../plugin";
+import { AssetArtifact, OiContractConnector, OiContractConnectorParams  } from "@openibex/chain";
 import { AccountId } from "caip";
 import { EventLog } from "ethers";
-import { OiErc20Api } from "./api";
+import { EthereumEventIndexer } from "../chain";
+import { WithPluginServices } from "@openibex/core";
 
 /**
  * The OiErc20Connector is listening to the standard events of ERC20 and creates a few producers:
@@ -12,7 +11,7 @@ import { OiErc20Api } from "./api";
  * - Holders: All holders in that block and on-chain as trie. As well a holders table that represents latest status.
  *
  */
-export class OiErc20 extends OiContractConnector {
+export class OiErc20Connector extends OiContractConnector {
 
   /**
    * Constructor.
@@ -20,36 +19,20 @@ export class OiErc20 extends OiContractConnector {
    * @param assetArtifact AssetArtifact, has to be 'erc20' denominated.
    * @param params 
    */
-  constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams) {
-    super(assetArtifact, params);
-    super.addProducer('Transfer', new OiChainTokenSupply(assetArtifact));
+  constructor(assetArtifact: AssetArtifact, params: OiContractConnectorParams, bloomFilter?: string[][]) {
+    super(assetArtifact, params, bloomFilter);
+    
+    super.addIndexer('Transfer', new EthereumEventIndexer(assetArtifact, 'Transfer', this.startBlock, this.bloomFilter ));
+    super.addEventProcessor('Transfer', this.processTransfer.bind(this));
+    // super.addProducer('Transfer', new OiChainTokenSupplyProducer(assetArtifact, this.indexers['Transfer'].getSubscriptionId()));
   }
 
-  /**
-   * Ethereum-specific init method. Overwrites parent.
-   */
-  public async init() {
-    super.initProducers('Transfer');
+  public async processTransfer(from: string, to: string, amount: bigint, event: EventLog): Promise<any> {
+    const fromAccount = new AccountId({chainId: this.assetArtifact.chainId, address: from});
+    const toAccount = new AccountId({chainId: this.assetArtifact.chainId, address: to});
 
-    super.index('Transfer', async (from: string, to: string, amount: bigint, event: EventLog) => {
-      await super.saveBlock('Transfer', event.blockNumber);
-      
-      const fromAccount = new AccountId({chainId: this.assetArtifact.chainId, address: from});
-      const toAccount = new AccountId({chainId: this.assetArtifact.chainId, address: to});
-
-      const [caipTagFrom, caipTagTo] = await super.tagAndResolve(fromAccount, toAccount);
-      
-      plugin.log.info(`ERC20 transfer ${amount}, ${fromAccount.toString()}, ${toAccount.toString()}`);
-
-      await super.addLog('Transfer', { block: event.blockNumber, caipTagFrom, caipTagTo, amount, event});
-
-      plugin.log.info(`ERC20 transfer CAIP-Tags from ${caipTagFrom} (${fromAccount.toString()}), to ${caipTagTo} (${fromAccount.toString()})`);
-      plugin.log.info(`ERC20 transfer looking up addresses: ${await lookupCaipTag(caipTagFrom)} (${caipTagFrom}), ${await lookupCaipTag(caipTagTo)} (${caipTagTo})`);
-    }, 
-    20740100 );
+    const [fromAddress, toAddress] = await super.tagAndResolve(fromAccount, toAccount);
+   
+    return { block: event.blockNumber, fromAddress, toAddress, amount, event}
   }
 }
-
-await useContractConnector('erc20', OiErc20, 'eip155');
-await useABI('eip155', 'erc20', ERC20abi);
-await useContractAPI('erc20', OiErc20Api, 'eip155');

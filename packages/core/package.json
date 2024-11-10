@@ -28,6 +28,7 @@
     "@types/node": "^20.12.13",
     "blockstore-core": "^4.4.1",
     "blockstore-level": "^1.1.8",
+    "bufferutil": "^4.0.8",
     "helia": "^4.2.3",
     "libp2p": "^1.6.1",
     "ts-node": "^10.9.2",

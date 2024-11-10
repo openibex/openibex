@@ -1,70 +1,64 @@
-import { Wallet, HDNodeWallet } from "ethers";
-import { type AssetArtifact, ChainArtifact, getCAIPChain } from "./resolver";
-import { plugin } from "./plugin";
-import * as fs from 'fs';
-import { AccountId } from "caip";
+import { type AssetArtifact, ChainArtifact, OiCaipHelper } from "./caip";
+import { OiLoggerInterface, OiPlugin, WithPluginServices } from "@openibex/core";;
 
-interface WalletsList {
-  [chainId: string]: {
-    [name: string]: Wallet | HDNodeWallet;
-  };
-}
 
-const wallets: WalletsList = {}
+@WithPluginServices('openibex.chain/log', 'openibex.chain/caip')
+export class OiWalletHandler {
+  public log: OiLoggerInterface;
+  public caip: OiCaipHelper;
 
-export function initWallets(pluginConf: any) {
-  for (const namespace in pluginConf) {
-    for (const walletName in pluginConf[namespace].wallets) {
-      const walletInfo = pluginConf[namespace].wallets[walletName];
+  protected wallets: Record<string, any>;
 
-      if (walletInfo.file && walletInfo.password) {
-        const walletJsonString = fs.readFileSync(walletInfo.file, 'utf-8');
-        const wallet = Wallet.fromEncryptedJsonSync(walletJsonString, walletInfo.password);
-
-        if (!wallets[namespace]) {
-          wallets[namespace] = {};
-        }
-        wallets[namespace][walletName] = wallet;
-        plugin.log.info(`Initialized wallet ${walletName} on ${namespace}`);
-      } else {
-        plugin.log.error(`Missing file or password for ${walletName} wallet on ${namespace}`);
-      }
-    }
+  /**
+   * 
+   * @param pluginConf 
+   */
+  public init() {
+    throw new Error("Method 'init' must be implemented on platform specific contract handler.");
   }
-}
 
-/**
- * Returns a preconfigured wallet object or undefined if not found.
- * 
- * @param name Wallet name.
- * @param chainArtifact Target namespace / platform.
- * @returns 
- */
-export function getWallet(walletName: string, chainArtifact: ChainArtifact) {
-  const namespace = getCAIPChain(chainArtifact).namespace;
+  /**
+   * Returns a preconfigured wallet object or undefined if not found.
+   * 
+   * @param name Wallet name.
+   * @param chainArtifact Target namespace / platform.
+   * @returns 
+   */
+  public get(walletName: string) {
 
-  if(namespace && wallets[namespace][walletName])
-    return wallets[namespace][walletName];
+    if(this.wallets[walletName])
+      return this.wallets[walletName];
 
-  plugin.log.warn(`Wallet ${name} for ${namespace} was not found.`);
-  
-  return undefined;
-}
+    this.log.warn(`Wallet ${walletName} for eip155 was not found.`);
+    
+    return undefined;
+  }
 
-/**
- * Void Wallets are wallets without private key. Useful to i.e. simulate TX on behalf of an user or a multisig.
- * 
- * @param assetArtifact Any Asset Artifact or Accountid
- * @param walletName Default is wallet address.
- */
-export function createVoidWallet(assetArtifact: AssetArtifact | AccountId, walletName?: string) {
-  // TODO
-}
+  /**
+   * Void Wallets are wallets without private key. Useful to i.e. simulate TX on behalf of an user or a multisig.
+   * 
+   * @param assetArtifact Any Asset Artifact or Accountid
+   * @param walletName Default is wallet address.
+   */
+  public createVoidWallet(walletName?: string) {
+    throw new Error("Method 'createVoidWallet' must be implemented on platform specific contract handler.");
+  }
 
-export function signMessage(walletName: string, message: string) {
-  // TODO
-}
+  /**
+   * 
+   * @param walletName 
+   * @param message 
+   */
+  public signMessage(walletName: string, message: string) {
+    throw new Error("Method 'signMessage' must be implemented on platform specific contract handler.");
+  }
 
-export function verifyMessage(sender: ChainArtifact, signedMessage: string) {
-  // TODO
+  /**
+   * 
+   * @param sender 
+   * @param signedMessage 
+   */
+  public verifyMessage(sender: ChainArtifact, signedMessage: string) {
+    throw new Error("Method 'verifyMessage' must be implemented on platform specific contract handler.");
+  }
 }

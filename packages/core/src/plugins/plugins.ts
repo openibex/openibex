@@ -1,49 +1,97 @@
 import { OiLoggerInterface } from "../core";
-import { OiConfig } from "../core.config";
+import { OiConfig } from "../config";
 import { OiPlugin } from "./plugin";
+import { OiPluginService } from "./service";
 
-const plugins: string[] = [];
+export class OiPluginRegistry {
+  private static instance: OiPluginRegistry;
+  private pluginRegister: Record<string, Record<string, OiPlugin>> = {};
+  private initializedPlugins = new Set<string>();
 
-const pluginRegister: { [namespace: string]: { [pluginName: string]: OiPlugin } } = {
-  eip155: {}
-};
+  private constructor() {}
 
-/**
- * Register a plugin.
- * 
- * @param plugin Module name 
- * @param namespace Module namespace. If none is given, the configured db namespace is used.
- * @returns Module configuration
- */
-export function registerOiPlugin(pluginName: string, namespace: string, plugin: OiPlugin)  {
-  if (!pluginRegister[namespace]) {
-    pluginRegister[namespace] = {};
+  static getInstance(): OiPluginRegistry {
+    if (!OiPluginRegistry.instance) {
+      OiPluginRegistry.instance = new OiPluginRegistry();
+    }
+    return OiPluginRegistry.instance;
   }
 
-  pluginRegister[namespace][pluginName] = plugin;
-}
+  /**
+   * Register a plugin.
+   * 
+   * @param namespace Module namespace
+   * @param pluginName Module name
+   * @param plugin Plugin instance
+   */
+  register(namespace: string, pluginName: string, plugin: OiPlugin): void {
+    if (!this.pluginRegister[namespace]) {
+      this.pluginRegister[namespace] = {};
+    }
+    this.pluginRegister[namespace][pluginName] = plugin;
+  }
 
-/**
- * Is called on core init, prepares all plugins.
- * 
- * @param config App configurations with plugins section.
- * @param logger 
- */
-export async function initPlugins(config: OiConfig, coreDB: any, logger: OiLoggerInterface){
-  const promises: Promise<void>[] = [];
-  const pluginConfigs = config.plugins;
-
-  for (let namespace in pluginRegister) {
-    for (let plugin in pluginRegister[namespace]) {
-      let pluginConf = {}
-      if (namespace in pluginConfigs ) {
-        if (plugin in pluginConfigs[namespace]) {
-          pluginConf = pluginConfigs[namespace][plugin];
-        }
+  /**
+   * Initialize all plugins as per configuration.
+   * 
+   * @param config Application configuration with plugins section
+   * @param coreDB Database instance
+   * @param logger Logger instance
+   */
+  async initPlugins(config: OiConfig, coreDB: any, logger: OiLoggerInterface): Promise<void> {
+   
+    const initializePlugin = async (namespace: string, pluginName: string, pluginConf: any) => {
+      const pluginKey = `${namespace}.${pluginName}`;
+      if (this.initializedPlugins.has(pluginKey)) return; // Skip if already initialized
+  
+      const pluginInstance = this.getPlugin(namespace, pluginName);
+      
+      for (const dependency of pluginInstance.dependencies || []) {
+        const [depNamespace, depName] = dependency.split(".");
+        await initializePlugin(depNamespace, depName, config.plugins[depNamespace]?.[depName] || {});
       }
-      promises.push(pluginRegister[namespace][plugin].init(config.database.namespace, pluginConf, coreDB, logger));
+  
+      await pluginInstance.init(pluginConf, coreDB, logger);
+      logger.info(`Initialized plugin ${pluginKey}.`)
+      this.initializedPlugins.add(pluginKey);
+    };
+  
+    for (let namespace in this.pluginRegister) {
+      for (let pluginName in this.pluginRegister[namespace]) {
+        const pluginConf = config.plugins[namespace]?.[pluginName] || {};
+        await initializePlugin(namespace, pluginName, pluginConf);
+      }
+    }
+  }
+  
+  /**
+   * Retrieve a plugin instance by namespace and name.
+   * 
+   * @param namespace Plugin namespace
+   * @param pluginName Plugin name
+   * @returns Plugin instance
+   */
+  public getPlugin<T extends OiPlugin>(namespace: string, pluginName: string): T {
+    if (!this.pluginRegister[namespace]) {
+      throw new Error(`Plugin namespace ${namespace} not found when looking for ${namespace}.${pluginName}`);
     }
 
-    await Promise.all(promises);
+    if (!this.pluginRegister[namespace][pluginName]) {
+      throw new Error(`Plugin ${namespace}.${pluginName} not found`);
+    }
+    
+    return this.pluginRegister[namespace][pluginName] as T;
+  }
+
+  /**
+   * Get plugin service.
+   * 
+   * @param dottedPluginName 
+   * @param serviceName 
+   * @returns 
+   */
+  public async getService(dottedPluginName: string, serviceName?: string): Promise<OiPluginService> {
+    const [namespace, plugin] = dottedPluginName.split('.');
+    return this.getPlugin(namespace, plugin).getService(serviceName);
   }
 }

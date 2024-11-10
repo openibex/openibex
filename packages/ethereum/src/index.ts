@@ -1,10 +1,12 @@
-import '@openibex/chain';
+import './plugin';
 
-export {EthereumProviderFactory} from './provider';
-export {EthereumSubscriberFactory} from './subscriber';
-export {EthereumContractFactory} from './contract';
-export {EthereumEventIndexer} from './indexer';
+import './chain';
 
 import './erc20';
-import './erc721';
-import './erc1155';
+import './erc173';
+
+export { EthereumProviderHandler, EthereumContractHandler, EthereumBlockHandler } from './chain';
+export { EthereumContractAPI, EthereumEventIndexer} from './chain';
+
+export { ERC173abi, OiErc173API, OiErc173Connector } from './erc173';
+export { ERC20abi, OiErc20API, OiErc20Connector } from './erc20';
