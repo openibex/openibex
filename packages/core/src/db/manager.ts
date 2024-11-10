@@ -1,6 +1,6 @@
 import { KeyValue } from "@orbitdb/core";
-import { OiLoggerInterface } from "../core";
-import { openDatabase } from "../db";
+import { OiLoggerInterface } from "../types";
+import { OiDatabase } from "../db";
 
 export type OiCoreSchema = { 
   address: string; 
@@ -54,7 +54,7 @@ export class OiDbManager {
 
     let dbOpts: OiCoreSchema | undefined = await this.coreDB.get(dbName);
 
-    const db = await openDatabase(dbOpts ? dbOpts.address : dbName, dbOpts ? dbOpts.type: type);
+    const db = await OiDatabase.getInstance().open(dbOpts ? dbOpts.address : dbName, dbOpts ? dbOpts.type: type);
     this.log.info(`Opened DB ${dbName} at address ${db.address}`);
 
     if(!dbOpts) {

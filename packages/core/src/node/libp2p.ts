@@ -8,10 +8,14 @@ import { yamux } from "@chainsafe/libp2p-yamux";
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { circuitRelayTransport } from "@libp2p/circuit-relay-v2";
 
+/**
+ * Libp2p configuration.
+ * Find the full reference at https://github.com/libp2p/js-libp2p/blob/main/doc/CONFIGURATION.md
+ */
 export const NodeLibp2pConfig: Record<string, any> = {
   standalone: {
     addresses: {
-      listen: ["/ip4/127.0.0.1/tcp/0/ws"],
+      listen: ['/ip4/127.0.0.1/tcp/0/ws'],
     },
     transports: [
       webSockets({
@@ -37,9 +41,7 @@ export const NodeLibp2pConfig: Record<string, any> = {
         filter: all,
       }),
       webRTC(),
-      circuitRelayTransport({
-        discoverRelays: 1,
-      }),
+      circuitRelayTransport(),
     ],
     connectionEncryption: [noise()],
     streamMuxers: [yamux()],
@@ -60,9 +62,7 @@ export const NodeLibp2pConfig: Record<string, any> = {
         filter: all,
       }),
       webRTC(),
-      circuitRelayTransport({
-        discoverRelays: 1,
-      }),
+      circuitRelayTransport(),
     ],
     connectionEncryption: [noise()],
     streamMuxers: [yamux()],

@@ -2,6 +2,7 @@
 export interface OiConfigHelia {
   libp2p: {
     mode: 'standalone' | 'public' | 'airgap' | 'browser';
+    keyfile: string;
   };
   blockstore: any;
   datastore: any;

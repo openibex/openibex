@@ -1,8 +1,7 @@
 import { KeyValue } from "@orbitdb/core";
 import { OiConfig } from "./config";
-import { startNode } from "./node";
-import { openDatabase } from "./db";
-import { getOiCore } from "./index";
+import { OiNode } from "./node";
+import { OiDatabase } from "./db";
 import type { OiCoreSchema } from "./plugins";
 
 // Define the type for the database entry
@@ -34,35 +33,32 @@ export interface OiPreload {
  * @param preload The preload databases and values.
  * @param logger The logger instance to use.
  */
-export async function initApp(config: OiConfig, preload: OiPreload, logger: any) {
+export async function initApp(config: OiConfig, logger: any, preload?: OiPreload) {
   logger.info('Starting Helia IPFS Server...');
-  await startNode(config.helia, config.database, logger);
+  const node = await OiNode.getInstance(config.helia, config.database, logger);
+  await node.start();
     
-  const coreDB = await openDatabase(
+  const coreDB = await OiDatabase.getInstance().open(
     `${config.database.namespace}.core.v1`, 'keyvalue'
   ) as unknown as KeyValue<OiCoreSchema>;
 
-  logger.info(`Initializing Dapp with coreDB Address: ${coreDB.address}`);
+  logger.info(`=========================================================================`)
+  logger.info(`= OpenIbex successfully initialized.                                    =`)
+  logger.info(`= ----------------------------------                                    =`)
+  logger.info(`= CoreDB at: ${coreDB.address} =`)
+  logger.info(`= Put it in your config at database.address to activate.                =`)
+  logger.info(`=========================================================================`)
 
-  // CoreDB contains a set of databases. This preloads overwrites for module
-  // Databases, as specified in the preload.yaml.
-  for(const value of preload.database) {
-    await coreDB.put(value.name, {address: value.address, type: value.type})
+  if(preload) {
+    // CoreDB contains a set of databases. This preloads overwrites for module
+    // Databases, as specified in the preload.yaml.
+    for(const value of preload.database) {
+      await coreDB.put(value.name, {address: value.address, type: value.type})
+    }
   }
 
-  config.database.address = coreDB.address;
-  
-  const core = await getOiCore(config, logger);
+  await node.stop();
 
-  for(const entry of preload.settings){
-    await core.setVal(entry.value, `${entry.namespace}.${entry.plugin}.${entry.name}`);
-    logger.info(`Preload entry ${entry.namespace}.${entry.plugin}.${entry.name} to value: ${await core.getVal( entry.name, `${entry.namespace}.${entry.plugin}.${entry.name}`)}`);
-  }
-
-  // Currently no other workaround for that: KeyValueIndexed creates a LevelStorage index.
-  // This requires a lot of async calls, and does not prevent the DB from closing.
-  // OrbitDB databases by default do not have any locks that would prevent a DB from closing
-  // while index is created.
-  logger.info(`Resolver Database is creating index, waiting for 5 seconds.`);
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  return coreDB.address;
 }
+

@@ -1,5 +1,5 @@
 import { KeyValue } from "@orbitdb/core";
-import { OiLoggerInterface } from "../core";
+import { OiLoggerInterface } from "../types";
 import { OiDbManager } from "../db";
 import { OiPluginService } from "./service";
 

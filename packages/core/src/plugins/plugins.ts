@@ -1,4 +1,4 @@
-import { OiLoggerInterface } from "../core";
+import { OiLoggerInterface } from "../types";
 import { OiConfig } from "../config";
 import { OiPlugin } from "./plugin";
 import { OiPluginService } from "./service";
