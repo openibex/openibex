@@ -17,6 +17,7 @@ import ValueCommand from './commands/value';
 import WatchCommand from './commands/watch';
 import path from 'path';
 import { pathToFileURL } from 'url';
+import { OiNode } from '@openibex/core';
 
 
 
@@ -106,12 +107,16 @@ function handleInterruptSignal() {
     const oiLogger = getOiLogger();
     oiLogger.info('Process interrupted. Closing OpenIbex core.');
     
-    await (await getOiCore()).stop()
+    if (core) {
+      await core.stop();
+    } else {
+      await OiNode.getInstance().stop();
+    }
 
-    oiLogger.info('Core closed. Exiting gracefully.');
+    oiLogger.info('Core and node stopped. Exiting gracefully.');
     process.exit(0);
   });
 }
 
 // Initialize main process with error handling
-main()
+main();
