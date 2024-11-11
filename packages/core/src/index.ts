@@ -1,4 +1,4 @@
-export { OiConfig, OiConfigDatabase, OiConfigHelia} from './config';
+export { OiConfig, OiConfigDatabase, OiConfigHelia} from './types';
 export { OiCore, getOiCore } from './core';
 
 export { OiLoggerInterface } from './types';

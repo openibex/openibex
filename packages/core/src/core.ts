@@ -1,6 +1,6 @@
 import { KeyValue } from "@orbitdb/core";
 
-import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./config";
+import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./types";
 
 import { OiPlugin, OiPluginRegistry, OiPluginService, type OiCoreSchema } from "./plugins";
 import { OiDatabase, OiDbManager, registerDatabaseTypes } from "./db";
