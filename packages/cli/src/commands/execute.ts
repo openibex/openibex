@@ -9,9 +9,9 @@ export default class ExecCommand extends OiCommand {
     this.name('exec')
       .description('Execute smart contract functions')
       .argument('<artifact>', 'AssetArtifact, any CAIP Asset address.')
-      .option('--wallet', 'Wallet name to use. Defaults to none (readonly) access.')
+      .option('--wallet <WALLETNAME>', 'Wallet name to use. Defaults to none (readonly) access. E.g. --wallet=alice')
       .argument('<functionName>', 'Method call to execute')
-      .argument('[args...]', 'Contract function arguments seperated by spaces.')
+      .argument('[args...]', 'Contract function arguments seperated by commas.')
       .action(this.execute.bind(this));
   }
 
