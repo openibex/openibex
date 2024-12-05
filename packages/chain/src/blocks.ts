@@ -28,7 +28,7 @@ export class OiBlockHandler {
    * @param chainArtifact ChainId or other ChainArtifact
    * @param callback 
    */
-  public subscribeLatest(chainArtifact: ChainArtifact, callback: (chainId: ChainId, block: number) => void): Promise<void> {
+  public subscribeLatest(callback: (chainId: ChainId, block: number) => Promise<void>) {
     throw new Error("Method 'latest' must be implemented on platform specific contract handler.");
   }
 
@@ -38,7 +38,7 @@ export class OiBlockHandler {
    * @param chainId The chain for which to retrieve.
    * @returns 
    */
-  public latest(chainId: ChainArtifact): Promise<number> {
+  public latest(): Promise<number> {
     throw new Error("Method 'latest' must be implemented on platform specific contract handler.");
   }
 }

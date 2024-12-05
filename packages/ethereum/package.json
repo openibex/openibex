@@ -22,18 +22,17 @@
     "clean": "npx rimraf node_modules dist"
   },
   "dependencies": {
-    "@openibex/core": "^0.0.4",
     "@openibex/chain": "^0.0.4",
+    "@openibex/core": "^0.0.4",
     "@orbitdb/core": "^2.2.0",
     "@types/node": "^20.12.13",
     "caip": "^1.1.1",
-    "ethers": "^6.13.2",
+    "ethers": "6.13.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "hardhat": "^2.22.5",
+    "@types/jest": "29.5.14",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.4",
     "tsx": "^4.11.2"
