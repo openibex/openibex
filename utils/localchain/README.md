@@ -28,7 +28,7 @@ yarn build
 yarn run oi init
 # MANUAL STEP! Copy the created Orbit-DB address to config.yml
 # Then, connect to the ERC-20 contract on localchain
-yarn run oi start --connect eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3
+yarn run oi connect eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3
 ```
 
 Alternatively (you need to close an eventually running observer!) you can execute smart-contract functions directly.
