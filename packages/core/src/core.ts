@@ -1,35 +1,11 @@
 import { KeyValue } from "@orbitdb/core";
 
-import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./config";
-import { OiPluginService, OiPluginRegistry, type OiCoreSchema, OiPlugin } from "./plugins";
-import { OiDbManager, openDatabase, registerDatabaseTypes } from "./db";
+import { OiConfig, OiConfigDatabase, OiConfigHelia } from "./types";
 
-/**
- * A simplistic Logger Interface compatible with standard loggers out there
- * (e.g. winston logging library
- */
-export interface OiLoggerInterface {
-  log(level: string, message: string): void;
-  info(message: string): void;
-  warn(message: string): void;
-  error(message: string): void;
-  // Add other methods if needed
-}
-
-export type OiValueSchema = { 
-  datatype: string, 
-  value: string 
-};
-
-export enum OiValueType {
-  String = "string",
-  Number = "number",
-  Boolean = "boolean",
-  BigInt = "bigint",
-  Symbol = "symbol",
-  Null = "null",
-  Undefined = "undefined"
-}
+import { OiPlugin, OiPluginRegistry, OiPluginService, type OiCoreSchema } from "./plugins";
+import { OiDatabase, OiDbManager, registerDatabaseTypes } from "./db";
+import { OiNode } from "./node";
+import { OiLoggerInterface } from "./types";
 
 // OiCore-Singleton
 let core: OiCore | undefined = undefined;
@@ -92,12 +68,18 @@ async function initOiCore(config: OiConfig, logger: OiLoggerInterface): Promise<
   coreInitLock = true;
 
   if (!config.database.address) throw Error('No DB address for coreDB in config. Please edit your config or run npx oi init');
+  logger.info('Starting Helia IPFS Server...');
+  const node = await OiNode.getInstance(config.helia, config.database, logger);
+  await node.start()
 
   core = new OiCore(config);
+  logger.info('Core created, proceed to core init.');
 
-  const coreDB = await openDatabase(config.database.address, 'keyvalue') as unknown as KeyValue<OiCoreSchema>;
+  const coreDB = await OiDatabase.getInstance().open(config.database.address, 'keyvalue') as unknown as KeyValue<OiCoreSchema>;
+  logger.info('CoreDB successfully opened.');
+
   await core.init(config, coreDB, logger);
-  
+  coreInitLock = false;
 }
 
 class BaseLogger implements OiLoggerInterface {
@@ -184,13 +166,13 @@ export class OiCore {
    * Stores a settings value for a plugin (persistent, among all workers)
    * 
    * @param value Value to store
-   * @param name Setting name
+   * @param name Setting name recommendation is to have dotted names.
    * @param tag Tag, will be added to the name for entity-specific settings. (i.e. a connector setting that can be changed per contract.)
    */
   public async setVal(value: any, name: string, tag?: string): Promise<void> {
     if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
 
-    await this.valuesDB.put(`${this.namespace}.${this.name}.${name}.${tag ? '.' + tag : ''}`, value);
+    await this.valuesDB.put(`${this.namespace}.${name}.${tag ? '.' + tag : ''}`, value);
   }
 
   /**
@@ -204,9 +186,22 @@ export class OiCore {
   public async getVal(name: string, tag?: string): Promise<any> {
     if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
 
-    return this.valuesDB.get(`${this.namespace}.${this.name}.${name}.${tag ? '.' + tag : ''}`);
+    return await this.valuesDB.get(`${this.namespace}.${name}.${tag ? '.' + tag : ''}`);
   }
 
+  /**
+   * Deletes a value.
+   * 
+   * @param name Setting name
+   * @param tag Tag, will be added to the name for entity-specific settings. (i.e. a connector setting that can be changed per contract.)
+   * @returns 
+   */
+  public async delVal(name: string, tag?: string): Promise<any> {
+    if (!this.valuesDB) throw Error('Database valuesDB not initialized. Run OiCore.init() first.');
+
+    await this.valuesDB.del(`${this.namespace}.${name}.${tag ? '.' + tag : ''}`);
+  }
+    
   //TODO: onUpdateValue(dottedName: string, callback: (key, value) => {})
 
   /**
@@ -250,5 +245,9 @@ export class OiCore {
       throw new Error("Plugins are only available and initialized after OiCore.init()")
     }
     return OiPluginRegistry.getInstance().getPlugin(namespace, pluginName);
+  }
+
+  public async stop() {
+    await OiNode.getInstance().stop();
   }
 }

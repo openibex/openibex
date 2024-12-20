@@ -5,7 +5,7 @@ import { OiKeyValueExtendedDatabase } from './keyvalue-extended';
 import { OiNKeyValueDatabase } from './nkeyvalue';
 
 // Internal database functions for core.
-export { initOrbitDB, getOrbitDB, isDBReady, openDatabase, stopDatabase } from './database';
+export { OiDatabase } from './database';
 
 // Generic data types for databases.
 export type { OiDbElements, OiDbSchema } from './dbtypes';

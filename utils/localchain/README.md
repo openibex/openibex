@@ -28,7 +28,7 @@ yarn build
 yarn run oi init
 # MANUAL STEP! Copy the created Orbit-DB address to config.yml
 # Then, connect to the ERC-20 contract on localchain
-yarn run oi start --connect eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3
+yarn run oi connect eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3
 ```
 
 Alternatively (you need to close an eventually running observer!) you can execute smart-contract functions directly.
@@ -48,12 +48,12 @@ A quick look at the CAIP `eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f6
 
 ```
 ### Will return 0 (as it does not have any tokens yet)
-yarn run oi exec --contract eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 --function balanceOf --args 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
+yarn run oi exec eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 balanceOf 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
 
 ### Send 1234 tokens to address 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360 from alice (which is the signer)
-yarn run oi exec --contract eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 --signer=alice --function transfer --args 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360,1234
+yarn run oi exec --wallet=alice eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3  transfer 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360,1234
 
 ### The balance now reads as 1234
-yarn run oi exec --contract eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 --function balanceOf --args 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
+yarn run oi exec eip155:31337/erc20:0x5FbDB2315678afecb367f032d93F642f64180aa3 balanceOf 0x6d4cc96bd9135c25cbcaa4d38a0b514798a60360
 ```
 
