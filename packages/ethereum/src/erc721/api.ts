@@ -1,9 +1,11 @@
-import { OiEthereumApi } from "../api";
+import {  EthereumContractAPI } from "../chain";
 
 /**
  * API of the ERC20 contract
  */
-export class OiErc721API extends OiEthereumApi {
+export class OiErc721API extends EthereumContractAPI {
+
+  
   
 }
 
