@@ -1,6 +1,6 @@
 {
   "name": "@openibex/cli",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "repository": "https://github.com/openibex/openibex/",
   "bugs": {
     "url": "https://github.com/openibex/openibex/issues"
@@ -28,7 +28,7 @@
   "dependencies": {
     "@openibex/chain": "^0.1.1",
     "@openibex/core": "^0.1.1",
-    "@openibex/ethereum": "^0.1.1",
+    "@openibex/ethereum": "^0.1.2",
     "@openibex/protocols": "^0.1.1",
     "@openibex/usd-circle": "^0.1.1",
     "@orbitdb/core": "^2.2.0",
