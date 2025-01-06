@@ -15,7 +15,7 @@ export default class ExecCommand extends OiCommand {
       .action(this.execute.bind(this));
   }
 
-  async execute(artifact: string, functionName: string, args: string[], options: { wallet?: string; details?: boolean;}) {
+  async execute(artifact: string, functionName: string, args: string[], options: { wallet?: string;}) {
     // Access the logger and config
     this.logger.info(`Executing function call with: ${artifact}`);
 
@@ -26,11 +26,7 @@ export default class ExecCommand extends OiCommand {
 
     this.logger.info(`API created with ${options.wallet ? `wallet ${options.wallet}`: 'no wallet'}.`);
     
-    if (options.details) {
-      // TODO: Show details like connectorparams and others.
-    }
-    
-    const returnValue = await api.execute(functionName, args.join(' '))
+    const returnValue = await api.execute(functionName, args.join(','))
   
     this.logger.info(`Calling function '${functionName}' returns ${returnValue}`);
   }

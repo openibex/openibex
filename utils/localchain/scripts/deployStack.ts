@@ -48,7 +48,37 @@ async function main() {
 
   await tx.wait();
   console.log("Transaction Confirmed!");
+  
+  
+  
+  console.log("\n\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Funding of Rupicapra-Wallets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n")
+  
+  // This funds alice wallet in wallets/eip155/alice.json
+  const tx2 = await manitu.sendTransaction({
+    to: "0xeE9CD548bf721806Aa597BEe871C50c022C4FccE",
+    value: ethers.parseEther("1.0") // Adjust the value as needed
+  });
 
+  console.log("Transaction Hash:", tx2.hash);
+
+  await tx2.wait();
+  console.log("Transaction Confirmed!");
+
+
+  console.log("\n\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ERC-2771 and ERC-721 sample ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n")
+   // Deploy the SimpleForwarder contract
+   console.log("Deploying SimpleForwarder...");
+   const Forwarder = await ethers.getContractFactory("SimpleForwarder");
+   const forwarder = await Forwarder.deploy();
+   const forwarderAddr = await forwarder.getAddress();
+   console.log(`SimpleForwarder deployed at: ${forwarderAddr}`);
+ 
+   // Deploy the DummyERC2771ERC721 contract
+   console.log("Deploying DummyNFT...");
+   const ERC721 = await ethers.getContractFactory("DummyNFT");
+   const erc721 = await ERC721.deploy(forwarderAddr); // Pass forwarder address to the constructor
+   console.log(`DummyERC2771ERC721 deployed at: ${await erc721.getAddress()}`);
+ 
 }
 
 // We recommend this pattern to be able to use async/await everywhere
