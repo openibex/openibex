@@ -1,6 +1,6 @@
 {
   "name": "@openibex/ethereum",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "repository": "https://github.com/openibex/openibex/",
   "bugs": {
     "url": "https://github.com/openibex/openibex/issues"
@@ -22,7 +22,7 @@
     "clean": "npx rimraf node_modules dist"
   },
   "dependencies": {
-    "@openibex/chain": "^0.1.1",
+    "@openibex/chain": "^0.1.3",
     "@openibex/core": "^0.1.1",
     "@orbitdb/core": "^2.2.0",
     "@types/node": "^20.12.13",

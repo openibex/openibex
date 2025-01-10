@@ -1,6 +1,6 @@
 {
   "name": "@openibex/usd-circle",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "repository": "https://github.com/openibex/openibex/",
   "bugs": {
     "url": "https://github.com/openibex/openibex/issues"
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@openibex/core": "^0.1.1",
-    "@openibex/protocols": "^0.1.1",
+    "@openibex/protocols": "^0.1.3",
     "@types/node": "^20.12.13",
     "caip": "^1.1.1",
     "ts-node": "^10.9.2",
