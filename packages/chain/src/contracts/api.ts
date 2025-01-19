@@ -24,7 +24,11 @@ export class OiContractAPI {
 
   public contract: Promise<Contract>;
   public walletName: any;
-  public assetArtifact: AssetArtifact
+  public assetArtifact: AssetArtifact;
+
+  private _contractDeployed: boolean = undefined;
+
+
 
   /**
    * Construct new API 
@@ -37,8 +41,39 @@ export class OiContractAPI {
     this.contract = (OiPluginRegistry.getInstance().getPlugin('openibex', 'chain').getService('chain') as unknown as OiChain).contract(assetArtifact).get(walletName);
   }
 
-  public getRawContract(): Promise<Contract> {
+  public async getRawContract(): Promise<Contract> {
+
+    if(this._contractDeployed === undefined ){
+      // TODO logging debug level required?
+      this._contractDeployed = await this.contractIsDeployed(await this.contract);
+    }
+
+    if(!this._contractDeployed) {
+      throw Error(`No contract deployed at ${this.assetArtifact}`);
+    }
+
     return this.contract;
+  }
+
+  public async contractIsDeployed(contract: ethers.Contract): Promise<boolean> {
+    try {
+        // Get the address and provider from the contract object
+        const address = contract.target; // `target` is the address of the contract
+        const provider = contract.runner?.provider; // `runner?.provider` is the provider
+
+        if (!address || !provider) {
+            throw new Error("Invalid contract: missing address or provider.");
+        }
+
+        // Retrieve the code at the contract's address
+        const code = await provider.getCode(address);
+
+        // If the code is not empty, the contract exists
+        return code !== "0x";
+    } catch (error) {
+        console.error("Error checking contract existence:", error);
+        return false;
+    }
   }
 
   /**
@@ -120,55 +155,6 @@ public async prepareCall(functionName: string, argsArray: string[]): Promise<{ a
 
   return { args: convertedArgs, fragment: myFragment };
 }
-
-  private async doPrepCall(functionName: string, functionArgs: string): Promise<any> {
-    const actualContract = await this.getRawContract();
-    const fragments = actualContract.interface.fragments;
-  
-    // Find the corresponding FunctionFragment
-    let myFragment: FunctionFragment | undefined = undefined;
-    for (const f of fragments) {
-      if (!ethers.FunctionFragment.isFunction(f)) {
-        continue;
-      }
-      if ((f as FunctionFragment).name === functionName) {
-        myFragment = f as FunctionFragment;
-      }
-    }
-  
-    if (myFragment === undefined) {
-      throw new Error(`Cannot find ABI-definition of function ${functionName}`);
-    }
-  
-    // Regex to split the functionArgs while preserving JSON and quoted strings
-    const argsArray = this.tokenizeArguments(functionArgs);
-  
-    // Convert the arguments to the correct types using ABI coder
-    const abiCoder = new AbiCoder();
-    const convertedArgs = argsArray.map((arg, index) => {
-      const inputType = myFragment!.inputs[index].type;
-  
-      // Ignore arguments wrapped in '...'
-      if (arg.startsWith("'") && arg.endsWith("'")) {
-        return arg.slice(1, -1); // Strip the quotes and use as-is
-      }
-  
-      // Parse JSON objects
-      try {
-        if (arg.startsWith('{') && arg.endsWith('}')) {
-          return JSON.parse(arg); // JSONs are usually structs - keep them.
-        }
-      } catch {
-        // If JSON parsing fails, fall back to treating as a string/number        
-      }
-  
-      // Treat as a string or number
-      return abiCoder.decode([inputType], abiCoder.encode([inputType], [arg]))[0];
-    });
-  
-    return { args: convertedArgs, fragment: myFragment };
-  }
-  
 
   public decodeResultFromAbi( result, fragment: FunctionFragment): {raw: unknown, decoded: Record<string, any>}  {
     const potentialComponents = fragment.outputs;
